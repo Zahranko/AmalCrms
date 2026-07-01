@@ -1,8 +1,8 @@
 const Map<String, String> enUs = {
   // NAV
   'nav.dashboard': 'Dashboard',
-  'nav.newCase': 'New Case',
   'nav.cases': 'Cases',
+  'nav.newCase': 'New Case',
   'nav.forwardedToMe': 'Forwarded to Me',
   'nav.forwardedByMe': 'Forwarded by Me',
   'nav.manageLists': 'Manage Lists',
@@ -250,6 +250,18 @@ const Map<String, String> enUs = {
   'confirmUser.disableTitle': 'Disable account',
   'confirmUser.enableMsg': "Re-enable {username}'s account? They will be able to sign in again.",
   'confirmUser.disableMsg': "Disable {username}'s account? They will no longer be able to sign in.",
+
+  // ADMIN DASHBOARD
+  'admin.stats': 'Summary',
+  'admin.totalCases': 'Total Cases',
+  'admin.successRate': 'Success',
+  'admin.failedRate': 'Failed',
+  'admin.referralSources': 'Referral Sources',
+  'admin.employees': 'Employee Performance',
+  'admin.total': 'Total',
+  'admin.noData': 'No data yet.',
+  'admin.viewAllCases': 'View All Cases',
+  'admin.manageUsers': 'Manage Users',
 
   // LANGUAGE
   'lang.toggle': 'العربية',

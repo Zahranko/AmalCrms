@@ -25,16 +25,23 @@ Future<void> main() async {
   Get.put(langService);
 
   final authController = Get.put(AuthController(StorageService(prefs)), permanent: true);
-  // Registered after auth so it can read the session; polls only while logged in.
   Get.put(NotificationCenterController(), permanent: true);
 
-  // Ask for notification permission up front (no-op on platforms that don't need it).
-  await LocalNotificationsService.instance.requestPermissions();
+  String initialRoute;
+  if (authController.isLoggedIn) {
+    initialRoute = authController.session.value!.role == 'Admin'
+        ? Routes.adminDashboard
+        : Routes.dashboard;
+  } else {
+    initialRoute = Routes.login;
+  }
 
-  runApp(CrmsApp(
-    initialRoute: authController.isLoggedIn ? Routes.dashboard : Routes.login,
-    initialLocale: langService.currentLocale,
-  ));
+  runApp(CrmsApp(initialRoute: initialRoute, initialLocale: langService.currentLocale));
+
+  // Request permission AFTER runApp so the Android Activity is live.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    LocalNotificationsService.instance.requestPermissions();
+  });
 }
 
 class CrmsApp extends StatelessWidget {

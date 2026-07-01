@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../modules/admin_dashboard/bindings/admin_dashboard_binding.dart';
+import '../modules/admin_dashboard/views/admin_dashboard_view.dart';
 import '../modules/case_detail/bindings/case_detail_binding.dart';
 import '../modules/case_detail/views/case_detail_view.dart';
 import '../modules/cases/bindings/cases_binding.dart';
@@ -28,6 +30,11 @@ class AppPages {
       name: Routes.login,
       page: () => const LoginView(),
       binding: LoginBinding(),
+    ),
+    GetPage(
+      name: Routes.adminDashboard,
+      page: () => const AdminDashboardView(),
+      binding: AdminDashboardBinding(),
     ),
     GetPage(
       name: Routes.dashboard,

@@ -37,7 +37,8 @@ class AuthController extends GetxController {
       if (Get.isRegistered<NotificationCenterController>()) {
         Get.find<NotificationCenterController>().start();
       }
-      Get.offAllNamed(Routes.dashboard);
+      final dashRoute = result.role == 'Admin' ? Routes.adminDashboard : Routes.dashboard;
+      Get.offAllNamed(dashRoute);
     } catch (e) {
       errorMessage.value = e.toString();
     } finally {

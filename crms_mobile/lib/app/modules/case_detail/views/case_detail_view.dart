@@ -92,86 +92,106 @@ class _CaseBody extends GetView<CaseDetailController> {
 }
 
 class _Actions extends GetView<CaseDetailController> {
+  static const _btnShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)));
+  static const _btnPad = EdgeInsets.symmetric(horizontal: 18, vertical: 13);
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final busy = controller.isForwarding.value || controller.isClaiming.value;
-      return Wrap(
-        spacing: 10,
-        runSpacing: 10,
+      final isAdmin = controller.authController.session.value?.role == 'Admin';
+      final status = controller.detail.value?.status ?? '';
+      final isReopenable = isAdmin && (status == 'Success' || status == 'Failed');
+      final hasSecondary = controller.isPendingRecipient ||
+          (!controller.isMine && !controller.isPendingRecipient) ||
+          controller.canForward ||
+          isReopenable;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Primary — Follow-up always shown full-width
           FilledButton.icon(
             onPressed: () => _openFollowUp(context),
             icon: const Icon(Icons.edit_note, size: 19),
             label: Text('action.followUp'.tr),
-          ),
-          // Accept/Decline when I'm the pending forward recipient
-          if (controller.isPendingRecipient) ...[
-            FilledButton.icon(
-              onPressed: busy ? null : () => _acceptForward(context),
-              icon: busy
-                  ? const SizedBox(width: 15, height: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.check_circle_outline, size: 19),
-              label: Text('action.accept'.tr),
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF16a34a),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              shape: _btnShape,
             ),
-            OutlinedButton.icon(
-              onPressed: busy ? null : () => _declineForward(context),
-              icon: const Icon(Icons.cancel_outlined, size: 19),
-              label: Text('action.decline'.tr),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFdc2626),
-                side: const BorderSide(color: Color(0xFFfca5a5)),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
+          ),
+          // Secondary actions
+          if (hasSecondary) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                if (controller.isPendingRecipient) ...[
+                  FilledButton.icon(
+                    onPressed: busy ? null : () => _acceptForward(context),
+                    icon: busy
+                        ? const SizedBox(width: 15, height: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.check_circle_outline, size: 19),
+                    label: Text('action.accept'.tr),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF16a34a),
+                      padding: _btnPad,
+                      shape: _btnShape,
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: busy ? null : () => _declineForward(context),
+                    icon: const Icon(Icons.cancel_outlined, size: 19),
+                    label: Text('action.decline'.tr),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFFdc2626),
+                      side: const BorderSide(color: Color(0xFFfca5a5)),
+                      padding: _btnPad,
+                      shape: _btnShape,
+                    ),
+                  ),
+                ],
+                if (!controller.isMine && !controller.isPendingRecipient)
+                  OutlinedButton.icon(
+                    onPressed: busy ? null : () => _claim(context),
+                    icon: busy
+                        ? const SizedBox(width: 15, height: 15, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.assignment_ind_outlined, size: 19),
+                    label: Text('action.assignToMe'.tr),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.navy700,
+                      side: const BorderSide(color: AppColors.fieldBorder),
+                      padding: _btnPad,
+                      shape: _btnShape,
+                    ),
+                  ),
+                if (controller.canForward)
+                  OutlinedButton.icon(
+                    onPressed: busy ? null : () => _openForward(context),
+                    icon: const Icon(Icons.forward_to_inbox_outlined, size: 19),
+                    label: Text('action.forward'.tr),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.navy700,
+                      side: const BorderSide(color: AppColors.fieldBorder),
+                      padding: _btnPad,
+                      shape: _btnShape,
+                    ),
+                  ),
+                if (isReopenable)
+                  FilledButton.icon(
+                    onPressed: busy ? null : () => _reopen(context),
+                    icon: const Icon(Icons.refresh, size: 19),
+                    label: Text('action.reopen'.tr),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.navy700,
+                      padding: _btnPad,
+                      shape: _btnShape,
+                    ),
+                  ),
+              ],
             ),
           ],
-          // Assign to Me when not mine and not pending recipient
-          if (!controller.isMine && !controller.isPendingRecipient)
-            OutlinedButton.icon(
-              onPressed: busy ? null : () => _claim(context),
-              icon: busy
-                  ? const SizedBox(width: 15, height: 15, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Icon(Icons.assignment_ind_outlined, size: 19),
-              label: Text('action.assignToMe'.tr),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.navy700,
-                side: const BorderSide(color: AppColors.fieldBorder),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          // Forward when I own the case and no pending forward
-          if (controller.canForward)
-            OutlinedButton.icon(
-              onPressed: busy ? null : () => _openForward(context),
-              icon: const Icon(Icons.forward_to_inbox_outlined, size: 19),
-              label: Text('action.forward'.tr),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.navy700,
-                side: const BorderSide(color: AppColors.fieldBorder),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          // Re-open: Admin only, on completed cases
-          if (controller.authController.session.value?.role == 'Admin' &&
-              (controller.detail.value?.status == 'Success' || controller.detail.value?.status == 'Failed'))
-            FilledButton.icon(
-              onPressed: busy ? null : () => _reopen(context),
-              icon: const Icon(Icons.refresh, size: 19),
-              label: Text('action.reopen'.tr),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.navy700,
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
         ],
       );
     });
@@ -238,24 +258,32 @@ class _DetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rows = <List<String>>[
-      ['case.phone'.tr, formatPhone(c.phoneCountryCode, c.phoneNumber)],
-      ['case.referralSource'.tr, c.referralSource],
-      ['case.procedure'.tr, c.procedure ?? '—'],
-      ['case.department'.tr, c.department ?? '—'],
-      ['case.hasDoctor'.tr, c.hasDoctor ? 'case.yes'.tr : 'case.no'.tr],
-      ['case.doctor'.tr, c.doctor ?? '—'],
-      ['case.appointment'.tr, c.appointmentDate != null ? formatDate(c.appointmentDate!) : '—'],
-      ['case.createdBy'.tr, c.createdByUsername ?? '—'],
-      ['case.assignedTo'.tr, (c.assignedToUsername == null || c.assignedToUsername!.isEmpty) ? 'case.unassigned'.tr : c.assignedToUsername!],
-      if (c.forwardedToUsername != null) ['case.pendingForwardTo'.tr, c.forwardedToUsername!],
-      ['case.created'.tr, formatDateTime(c.createdAt)],
-    ];
+    final rows = <List<String>>[];
+
+    void add(String label, String? value) {
+      if (value != null && value.isNotEmpty) rows.add([label, value]);
+    }
+
+    add('case.phone'.tr, formatPhone(c.phoneCountryCode, c.phoneNumber));
+    add('case.referralSource'.tr, c.referralSource);
+    add('case.procedure'.tr, c.procedure);
+    add('case.department'.tr, c.department);
+    rows.add(['case.hasDoctor'.tr, c.hasDoctor ? 'case.yes'.tr : 'case.no'.tr]);
+    add('case.doctor'.tr, c.doctor);
+    if (c.appointmentDate != null) rows.add(['case.appointment'.tr, formatDate(c.appointmentDate!)]);
+    add('case.createdBy'.tr, c.createdByUsername);
+    rows.add(['case.assignedTo'.tr,
+      (c.assignedToUsername == null || c.assignedToUsername!.isEmpty)
+          ? 'case.unassigned'.tr
+          : c.assignedToUsername!]);
+    if (c.forwardedToUsername != null) rows.add(['case.pendingForwardTo'.tr, c.forwardedToUsername!]);
+    rows.add(['case.created'.tr, formatDateTime(c.createdAt)]);
 
     return Column(
       children: [
         for (final r in rows) _DetailRow(label: r[0], value: r[1]),
-        _DetailRow(label: 'case.description'.tr, value: c.description, multiline: true),
+        if (c.description.isNotEmpty)
+          _DetailRow(label: 'case.description'.tr, value: c.description, multiline: true),
         if (c.clinicSignature != null) _DetailSignature(dataUrl: c.clinicSignature!),
       ],
     );

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../models/admin_stats.dart';
 import '../models/app_notification.dart';
 import '../models/app_user.dart';
 import '../models/case_detail.dart';
@@ -130,6 +131,13 @@ class ApiService {
       }
     }
     return 'Something went wrong. Please try again.';
+  }
+
+  // ---------- Admin ----------
+
+  Future<AdminStats> getAdminStats(String token) async {
+    final data = await _request('GET', '/admin/stats', token: token);
+    return AdminStats.fromJson(data as Map<String, dynamic>);
   }
 
   // ---------- Users ----------

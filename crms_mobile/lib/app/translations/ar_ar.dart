@@ -251,6 +251,18 @@ const Map<String, String> arAr = {
   'confirmUser.enableMsg': 'إعادة تفعيل حساب {username}؟ سيتمكن من تسجيل الدخول مجدداً.',
   'confirmUser.disableMsg': 'تعطيل حساب {username}؟ لن يتمكن من تسجيل الدخول.',
 
+  // ADMIN DASHBOARD
+  'admin.stats': 'ملخص',
+  'admin.totalCases': 'إجمالي الحالات',
+  'admin.successRate': 'نجاح',
+  'admin.failedRate': 'فشل',
+  'admin.referralSources': 'مصادر الإحالة',
+  'admin.employees': 'أداء الموظفين',
+  'admin.total': 'الإجمالي',
+  'admin.noData': 'لا توجد بيانات بعد.',
+  'admin.viewAllCases': 'عرض جميع الحالات',
+  'admin.manageUsers': 'إدارة المستخدمين',
+
   // LANGUAGE
   'lang.toggle': 'English',
   'lang.current': 'العربية',

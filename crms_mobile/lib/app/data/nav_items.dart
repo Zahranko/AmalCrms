@@ -15,7 +15,9 @@ class NavItems {
   NavItems._();
 
   static const items = [
-    NavItem(route: Routes.dashboard, labelKey: 'nav.dashboard'),
+    NavItem(route: Routes.adminDashboard, labelKey: 'nav.dashboard', roles: ['Admin']),
+    NavItem(route: Routes.dashboard, labelKey: 'nav.cases', roles: ['Admin']),
+    NavItem(route: Routes.dashboard, labelKey: 'nav.dashboard', roles: ['Employee', 'Manager']),
     NavItem(route: Routes.newCase, labelKey: 'nav.newCase'),
     NavItem(route: Routes.forwardedCases, labelKey: 'nav.forwardedToMe'),
     NavItem(route: Routes.forwardedByMe, labelKey: 'nav.forwardedByMe'),
