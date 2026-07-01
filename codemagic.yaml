@@ -1,0 +1,62 @@
+workflows:
+
+  # ── iOS IPA ─────────────────────────────────────────────────────────────────
+  ios-release:
+    name: iOS Release (IPA)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    working_directory: crms_mobile
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: ad_hoc          # change to 'enterprise' for Enterprise Program
+        bundle_identifier: com.alamal.crms
+      vars:
+        BUNDLE_ID: com.alamal.crms
+    scripts:
+      - name: Flutter pub get
+        script: flutter pub get
+      - name: Build IPA
+        script: |
+          flutter build ipa \
+            --release \
+            --export-options-plist=ios/ExportOptions.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      email:
+        recipients:
+          - zahranko8@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  # ── Android APK ─────────────────────────────────────────────────────────────
+  android-release:
+    name: Android Release (APK)
+    max_build_duration: 60
+    instance_type: linux_x2
+    working_directory: crms_mobile
+    environment:
+      flutter: stable
+      android_signing:
+        - crms_keystore              # upload keystore in Codemagic → App settings → Code signing
+      vars:
+        CM_KEYSTORE_PATH: /tmp/keystore.jks
+    scripts:
+      - name: Flutter pub get
+        script: flutter pub get
+      - name: Build APK
+        script: flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+    publishing:
+      email:
+        recipients:
+          - zahranko8@gmail.com
+        notify:
+          success: true
+          failure: true

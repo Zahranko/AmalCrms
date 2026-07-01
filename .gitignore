@@ -1,0 +1,40 @@
+# Visual Studio
+.vs/
+*.user
+
+# .NET build outputs
+CRMS/bin/
+CRMS/obj/
+
+# Published output — deploy manually, not tracked in git
+publish/
+
+# Flutter (root-level complements crms_mobile/.gitignore)
+crms_mobile/.dart_tool/
+crms_mobile/.flutter-plugins
+crms_mobile/.flutter-plugins-dependencies
+crms_mobile/build/
+crms_mobile/coverage/
+
+# Android Gradle
+crms_mobile/android/.gradle/
+crms_mobile/android/local.properties
+
+# iOS CocoaPods build artifacts (Podfile itself IS committed)
+crms_mobile/ios/Pods/
+crms_mobile/ios/.symlinks/
+crms_mobile/ios/Flutter/Generated.xcconfig
+crms_mobile/ios/Flutter/flutter_export_environment.sh
+
+# ASP.NET config — contains real secrets (JWT key, connection strings)
+# Copy appsettings.example.json → appsettings.json and fill in values
+CRMS/appsettings.json
+CRMS/appsettings.Development.json
+
+# Claude Code internal
+.claude/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Al Amal Hospital | Dashboard</title>
+  <link rel="icon" type="image/webp" href="amal-logo.webp" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__left">
+      <button id="menu-toggle" class="btn-burger" aria-label="Open menu" data-i18n-aria="topbar.openMenu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="topbar__logo" />
+    </div>
+    <div class="topbar__user">
+      <div class="topbar__user-info">
+        <span id="welcome-name">—</span>
+        <span id="welcome-role" class="badge">—</span>
+      </div>
+      <button id="lang-toggle" class="btn-lang">العربية</button>
+      <button id="logout-btn" class="btn-logout" data-i18n="topbar.logout">Log out</button>
+    </div>
+  </header>
+
+  <div id="drawer-overlay" class="drawer-overlay"></div>
+  <nav id="drawer" class="drawer" aria-label="Main navigation">
+    <div class="drawer__header">
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="drawer__logo" />
+      <button type="button" class="modal-close" id="drawer-close" aria-label="Close menu" data-i18n-aria="topbar.closeMenu">&times;</button>
+    </div>
+    <ul id="drawer-nav-list" class="drawer__nav"></ul>
+  </nav>
+
+  <main class="dashboard">
+
+    <!-- Employee dashboard -->
+    <section class="users-panel" id="welcome-section" hidden>
+      <div class="users-panel__header">
+        <div>
+          <h1 data-i18n="dashboard.title">Dashboard</h1>
+          <p data-i18n-html="dashboard.subtitle">View and manage all cases. Click <strong>Assign to Me</strong> to take ownership of a case.</p>
+        </div>
+      </div>
+
+      <div class="emp-dash-filters cases-view-toggle">
+        <button type="button" class="seg-btn seg-btn--active" data-filter="all" data-i18n="filter.allCases">All Cases</button>
+        <button type="button" class="seg-btn" data-filter="today" data-i18n="filter.today">Today</button>
+        <button type="button" class="seg-btn" data-filter="mine" data-i18n="filter.assignedToMe">Assigned to Me</button>
+        <button type="button" class="seg-btn" data-filter="unassigned" data-i18n="filter.unassigned">Unassigned</button>
+      </div>
+
+      <div class="admin-filter-bar" style="margin-top: 14px;">
+        <div class="cases-search field">
+          <div class="field__control">
+            <input type="search" id="emp-search" placeholder="Search by name or phone…" data-i18n-placeholder="search.placeholder" autocomplete="off" />
+          </div>
+        </div>
+      </div>
+
+      <div id="emp-cases-error" class="form-error" role="alert" hidden></div>
+      <div id="emp-cases-list"></div>
+      <div id="emp-cases-loading" class="users-empty" data-i18n="loading.cases">Loading cases…</div>
+      <div id="emp-cases-empty" class="users-empty" hidden></div>
+    </section>
+
+    <!-- Admin-only content -->
+    <section class="users-panel" id="admin-content" hidden>
+      <div class="users-panel__header">
+        <div>
+          <h1 data-i18n="admin.title">Dashboard</h1>
+          <p data-i18n="admin.subtitle">Overview of all cases and referral activity across the team.</p>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div id="stats-loading" class="users-empty" data-i18n="loading.stats">Loading statistics…</div>
+      <div id="stats-error" class="form-error" role="alert" hidden></div>
+
+      <div id="stats-section" hidden>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card__label" data-i18n="admin.totalCases">Total Cases</div>
+            <div class="stat-card__value" id="stat-total">—</div>
+          </div>
+          <div class="stat-card stat-card--success">
+            <div class="stat-card__label" data-i18n="status.success">Success</div>
+            <div class="stat-card__value" id="stat-success">—</div>
+            <div class="stat-card__sub" id="stat-success-pct">— of total</div>
+          </div>
+          <div class="stat-card stat-card--failed">
+            <div class="stat-card__label" data-i18n="status.failed">Failed</div>
+            <div class="stat-card__value" id="stat-failed">—</div>
+            <div class="stat-card__sub" id="stat-failed-pct">— of total</div>
+          </div>
+        </div>
+
+        <h2 class="admin-section-title" data-i18n="admin.referralSources">Referral Sources</h2>
+        <div class="users-table-wrap" style="margin-bottom: 32px;">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th data-i18n="col.source">Source</th>
+                <th data-i18n="col.cases">Cases</th>
+                <th style="width: 45%;" data-i18n="col.shareOfTotal">Share of total</th>
+              </tr>
+            </thead>
+            <tbody id="referral-stats-body"></tbody>
+          </table>
+        </div>
+
+        <h2 class="admin-section-title" data-i18n="admin.employees">Employees</h2>
+        <div class="users-table-wrap" style="margin-bottom: 32px;">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th data-i18n="col.employee">Employee</th>
+                <th data-i18n="col.casesCreated">Cases Created</th>
+                <th style="width: 45%;" data-i18n="col.shareOfTotal">Share of total</th>
+              </tr>
+            </thead>
+            <tbody id="employee-stats-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Employee detail modal -->
+      <div id="employee-modal" class="modal-overlay" hidden>
+        <div class="modal-card modal-card--sm" role="dialog" aria-modal="true" aria-labelledby="employee-modal-title">
+          <div class="modal-card__header">
+            <h2 id="employee-modal-title" data-i18n="col.employee">Employee</h2>
+            <button type="button" class="modal-close" data-close-modal="employee-modal" aria-label="Close">&times;</button>
+          </div>
+          <div id="employee-modal-body"></div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" data-close-modal="employee-modal" data-i18n="action.close">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cases -->
+      <h2 class="admin-section-title" data-i18n="admin.allCases">All Cases</h2>
+
+      <div class="admin-filter-bar">
+        <div class="cases-search field">
+          <div class="field__control">
+            <input type="search" id="admin-search" placeholder="Search by name or phone…" data-i18n-placeholder="search.placeholder" autocomplete="off" />
+          </div>
+        </div>
+        <div class="field admin-user-select">
+          <div class="field__control field__control--select">
+            <select id="admin-user-filter">
+              <option value="" data-i18n="admin.allEmployees">All employees</option>
+            </select>
+          </div>
+        </div>
+        <label class="admin-today-toggle">
+          <input type="checkbox" id="admin-today-only" />
+          <span data-i18n="admin.todayOnly">Today only</span>
+        </label>
+      </div>
+
+      <div id="admin-cases-error" class="form-error" role="alert" hidden></div>
+      <div id="admin-cases-list"></div>
+      <div id="admin-cases-loading" class="users-empty" data-i18n="loading.cases">Loading cases…</div>
+      <div id="admin-cases-empty" class="users-empty" hidden></div>
+    </section>
+
+  </main>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/adminDashboard.js"></script>
+  <script src="js/employeeDashboard.js"></script>
+</body>
+</html>

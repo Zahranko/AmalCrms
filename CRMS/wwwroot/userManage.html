@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Al Amal Hospital | User Management</title>
+  <link rel="icon" type="image/webp" href="amal-logo.webp" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__left">
+      <button id="menu-toggle" class="btn-burger" aria-label="Open menu" data-i18n-aria="topbar.openMenu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="topbar__logo" />
+    </div>
+    <div class="topbar__user">
+      <div class="topbar__user-info">
+        <span id="welcome-name">—</span>
+        <span id="welcome-role" class="badge">—</span>
+      </div>
+      <button id="lang-toggle" class="btn-lang">العربية</button>
+      <button id="logout-btn" class="btn-logout" data-i18n="topbar.logout">Log out</button>
+    </div>
+  </header>
+
+  <div id="drawer-overlay" class="drawer-overlay"></div>
+  <nav id="drawer" class="drawer" aria-label="Main navigation">
+    <div class="drawer__header">
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="drawer__logo" />
+      <button type="button" class="modal-close" id="drawer-close" aria-label="Close menu" data-i18n-aria="topbar.closeMenu">&times;</button>
+    </div>
+    <ul id="drawer-nav-list" class="drawer__nav"></ul>
+  </nav>
+
+  <main class="dashboard">
+    <section id="users-panel" class="users-panel">
+      <div class="users-panel__header">
+        <div>
+          <h1 data-i18n="users.title">User Management</h1>
+          <p data-i18n="users.subtitle">Create, edit, and manage staff accounts.</p>
+        </div>
+        <button type="button" id="add-user-btn" class="btn-primary" data-i18n="users.addUser">+ Add User</button>
+      </div>
+
+      <div id="users-error" class="form-error" role="alert" hidden></div>
+
+      <div class="users-table-wrap">
+        <table class="users-table" id="users-table" hidden>
+          <thead>
+            <tr>
+              <th data-i18n="users.colUsername">Username</th>
+              <th data-i18n="users.colRole">Role</th>
+              <th data-i18n="users.colStatus">Status</th>
+              <th data-i18n="users.colCreated">Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body"></tbody>
+        </table>
+        <div id="users-loading" class="users-empty" data-i18n="users.loading">Loading users…</div>
+        <div id="users-empty" class="users-empty" hidden>No users yet.</div>
+      </div>
+    </section>
+  </main>
+
+  <div id="user-modal" class="modal-overlay" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
+      <div class="modal-card__header">
+        <h2 id="user-modal-title">Add User</h2>
+        <button type="button" class="modal-close" id="user-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <form id="user-form" novalidate>
+        <div class="field">
+          <label for="user-username" data-i18n="userForm.username">Username</label>
+          <div class="field__control">
+            <input type="text" id="user-username" name="username" placeholder="e.g. jdoe" required minlength="3" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="field" id="user-password-field">
+          <label for="user-password" data-i18n="userForm.password">Password</label>
+          <div class="field__control">
+            <input type="password" id="user-password" name="password" placeholder="At least 6 characters" minlength="6" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="user-role" data-i18n="userForm.role">Role</label>
+          <div class="field__control field__control--select">
+            <select id="user-role" name="role" required>
+              <option value="Employee">Employee</option>
+              <option value="Manager">Manager</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" id="user-notify-field" hidden>
+          <label class="checkbox-label">
+            <input type="checkbox" id="user-notify-new-case" />
+            <span data-i18n="userForm.notifyNewCase">Receives new case alerts</span>
+          </label>
+        </div>
+
+        <div id="user-form-error" class="form-error" role="alert" hidden></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="user-modal-cancel" data-i18n="action.cancel">Cancel</button>
+          <button type="submit" class="btn-submit" id="user-form-submit">
+            <span class="btn-submit__label" data-i18n="action.save">Save</span>
+            <span class="btn-submit__spinner" hidden></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="password-modal" class="modal-overlay" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
+      <div class="modal-card__header">
+        <h2 id="password-modal-title" data-i18n="resetPassword.title">Reset Password</h2>
+        <button type="button" class="modal-close" id="password-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <form id="password-form" novalidate>
+        <p class="modal-subtitle">Set a new password for <strong id="password-modal-username">—</strong>.</p>
+        <div class="field">
+          <label for="new-password" data-i18n="resetPassword.newPassword">New password</label>
+          <div class="field__control">
+            <input type="password" id="new-password" name="newPassword" placeholder="At least 6 characters" minlength="6" required autocomplete="new-password" />
+          </div>
+        </div>
+
+        <div id="password-form-error" class="form-error" role="alert" hidden></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="password-modal-cancel" data-i18n="action.cancel">Cancel</button>
+          <button type="submit" class="btn-submit" id="password-form-submit">
+            <span class="btn-submit__label" data-i18n="action.resetPassword">Reset Password</span>
+            <span class="btn-submit__spinner" hidden></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="confirm-modal" class="modal-overlay" hidden>
+    <div class="modal-card modal-card--sm" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <div class="modal-card__header">
+        <h2 id="confirm-modal-title" data-i18n="confirmUser.title">Confirm</h2>
+        <button type="button" class="modal-close" id="confirm-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <p id="confirm-modal-message" class="modal-subtitle"></p>
+      <div id="confirm-modal-error" class="form-error" role="alert" hidden></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="confirm-modal-cancel" data-i18n="action.cancel">Cancel</button>
+        <button type="button" class="btn-danger" id="confirm-modal-accept" data-i18n="action.confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/userManage.js"></script>
+</body>
+</html>

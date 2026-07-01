@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Al Amal Hospital | Manage Lists</title>
+  <link rel="icon" type="image/webp" href="amal-logo.webp" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__left">
+      <button id="menu-toggle" class="btn-burger" aria-label="Open menu" data-i18n-aria="topbar.openMenu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="topbar__logo" />
+    </div>
+    <div class="topbar__user">
+      <div class="topbar__user-info">
+        <span id="welcome-name">—</span>
+        <span id="welcome-role" class="badge">—</span>
+      </div>
+      <button id="lang-toggle" class="btn-lang">العربية</button>
+      <button id="logout-btn" class="btn-logout" data-i18n="topbar.logout">Log out</button>
+    </div>
+  </header>
+
+  <div id="drawer-overlay" class="drawer-overlay"></div>
+  <nav id="drawer" class="drawer" aria-label="Main navigation">
+    <div class="drawer__header">
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="drawer__logo" />
+      <button type="button" class="modal-close" id="drawer-close" aria-label="Close menu" data-i18n-aria="topbar.closeMenu">&times;</button>
+    </div>
+    <ul id="drawer-nav-list" class="drawer__nav"></ul>
+  </nav>
+
+  <main class="dashboard">
+    <section class="users-panel">
+      <div class="users-panel__header">
+        <div>
+          <h1 data-i18n="manageLists.title">Manage Lists</h1>
+          <p id="lists-subtitle" data-i18n="manageLists.subtitle">Lookup values used across the app.</p>
+        </div>
+        <button type="button" id="add-btn" class="btn-primary" data-i18n="manageLists.addBtn">+ Add</button>
+      </div>
+
+      <div class="lists-tabs" id="lists-tabs" role="tablist">
+        <button type="button" class="seg seg--active" data-tab="department" data-i18n="manageLists.departments">Departments</button>
+        <button type="button" class="seg" data-tab="referral" data-i18n="manageLists.referralSources">Referral Sources</button>
+        <button type="button" class="seg" data-tab="doctor" data-i18n="manageLists.doctors">Doctors</button>
+        <button type="button" class="seg" data-tab="procedure" data-i18n="manageLists.procedures">Procedures</button>
+      </div>
+
+      <div class="cases-search field lists-search">
+        <div class="field__control">
+          <input type="search" id="lists-search" placeholder="Search…" data-i18n-placeholder="manageLists.searchPlaceholder" autocomplete="off" />
+        </div>
+      </div>
+
+      <div id="lists-error" class="form-error" role="alert" hidden></div>
+
+      <div class="users-table-wrap lists-scroll">
+        <table class="users-table" id="lists-table" hidden>
+          <thead id="lists-thead"></thead>
+          <tbody id="lists-table-body"></tbody>
+        </table>
+        <div id="lists-loading" class="users-empty" data-i18n="loading.generic">Loading…</div>
+        <div id="lists-empty" class="users-empty" hidden>Nothing here yet.</div>
+      </div>
+      <div class="lists-count" id="lists-count"></div>
+    </section>
+  </main>
+
+  <div id="list-item-modal" class="modal-overlay" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="list-item-modal-title">
+      <div class="modal-card__header">
+        <h2 id="list-item-modal-title">Add</h2>
+        <button type="button" class="modal-close" id="list-item-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <form id="list-item-form" novalidate>
+        <div class="field">
+          <label for="list-item-name" data-i18n="listItem.name">Name</label>
+          <div class="field__control">
+            <input type="text" id="list-item-name" name="name" required minlength="2" autocomplete="off" />
+          </div>
+        </div>
+
+        <div id="list-item-form-error" class="form-error" role="alert" hidden></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="list-item-modal-cancel" data-i18n="action.cancel">Cancel</button>
+          <button type="submit" class="btn-submit" id="list-item-form-submit">
+            <span class="btn-submit__label" data-i18n="action.save">Save</span>
+            <span class="btn-submit__spinner" hidden></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="confirm-modal" class="modal-overlay" hidden>
+    <div class="modal-card modal-card--sm" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+      <div class="modal-card__header">
+        <h2 id="confirm-modal-title" data-i18n="confirm.title">Confirm</h2>
+        <button type="button" class="modal-close" id="confirm-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <p id="confirm-modal-message" class="modal-subtitle"></p>
+      <div id="confirm-modal-error" class="form-error" role="alert" hidden></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="confirm-modal-cancel" data-i18n="action.cancel">Cancel</button>
+        <button type="button" class="btn-danger" id="confirm-modal-accept" data-i18n="action.confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/manageLists.js"></script>
+</body>
+</html>

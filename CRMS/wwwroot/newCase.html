@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Al Amal Hospital | New Case</title>
+  <link rel="icon" type="image/webp" href="amal-logo.webp" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__left">
+      <button id="menu-toggle" class="btn-burger" aria-label="Open menu" data-i18n-aria="topbar.openMenu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="topbar__logo" />
+    </div>
+    <div class="topbar__user">
+      <div class="topbar__user-info">
+        <span id="welcome-name">—</span>
+        <span id="welcome-role" class="badge">—</span>
+      </div>
+      <button id="lang-toggle" class="btn-lang">العربية</button>
+      <button id="logout-btn" class="btn-logout" data-i18n="topbar.logout">Log out</button>
+    </div>
+  </header>
+
+  <div id="drawer-overlay" class="drawer-overlay"></div>
+  <nav id="drawer" class="drawer" aria-label="Main navigation">
+    <div class="drawer__header">
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="drawer__logo" />
+      <button type="button" class="modal-close" id="drawer-close" aria-label="Close menu" data-i18n-aria="topbar.closeMenu">&times;</button>
+    </div>
+    <ul id="drawer-nav-list" class="drawer__nav"></ul>
+  </nav>
+
+  <main class="dashboard">
+    <section class="users-panel">
+      <div class="users-panel__header">
+        <div>
+          <h1 data-i18n="newCase.title">New Case</h1>
+          <p data-i18n-html="newCase.subtitle">Register a new patient case. It starts as <strong>Pending</strong> and is assigned to you.</p>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <form id="case-form" novalidate>
+          <div class="field">
+            <label for="case-name" data-i18n="newCase.patientName">Patient name</label>
+            <div class="field__control">
+              <input type="text" id="case-name" name="name" placeholder="Full name" data-i18n-placeholder="newCase.patientNamePlaceholder" required minlength="2" autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="case-phone" data-i18n="newCase.phone">Phone number</label>
+            <div class="field__control field__control--phone">
+              <select id="case-dial-code" class="field__dial" aria-label="Country code"></select>
+              <input type="tel" id="case-phone" name="phone" placeholder="Phone number" required autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="case-referral" data-i18n="newCase.referralSource">How did the patient hear about us?</label>
+            <div class="field__control field__control--select">
+              <select id="case-referral" name="referralSourceId" required>
+                <option value="" data-i18n="newCase.selectOption">Select an option</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="case-department" data-i18n="newCase.department">Department</label>
+            <div class="field__control field__control--select">
+              <select id="case-department" name="departmentId" required>
+                <option value="" data-i18n="newCase.selectDepartment">Select a department</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="case-procedure" data-i18n="newCase.procedure">Procedure</label>
+            <div class="field__control field__control--select">
+              <select id="case-procedure" name="procedureId" required>
+                <option value="" data-i18n="newCase.selectProcedure">Select a procedure</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="checkbox-label">
+              <input type="checkbox" id="case-has-doctor" />
+              <span data-i18n="newCase.hasDoctor">Has a doctor</span>
+            </label>
+          </div>
+
+          <div class="field">
+            <label for="case-doctor" data-i18n="newCase.doctor">Doctor</label>
+            <div class="field__control field__control--select">
+              <select id="case-doctor" name="doctorId">
+                <option value="" data-i18n="newCase.selectDoctor">Select a doctor</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="case-description" data-i18n="newCase.description">Description</label>
+            <div class="field__control">
+              <textarea id="case-description" name="description" rows="4" placeholder="Describe the patient's inquiry…" data-i18n-placeholder="newCase.descriptionPlaceholder" required minlength="2"></textarea>
+            </div>
+          </div>
+
+          <div id="case-form-error" class="form-error" role="alert" hidden></div>
+
+          <div class="modal-actions">
+            <button type="submit" class="btn-submit" id="case-form-submit">
+              <span class="btn-submit__label" data-i18n="newCase.createCase">Create case</span>
+              <span class="btn-submit__spinner" hidden></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/countries.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/newCase.js"></script>
+</body>
+</html>

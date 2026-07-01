@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Al Amal Hospital | Forwarded by Me</title>
+  <link rel="icon" type="image/webp" href="amal-logo.webp" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__left">
+      <button id="menu-toggle" class="btn-burger" aria-label="Open menu" data-i18n-aria="topbar.openMenu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="topbar__logo" />
+    </div>
+    <div class="topbar__user">
+      <div class="topbar__user-info">
+        <span id="welcome-name">—</span>
+        <span id="welcome-role" class="badge">—</span>
+      </div>
+      <button id="lang-toggle" class="btn-lang">العربية</button>
+      <button id="logout-btn" class="btn-logout" data-i18n="topbar.logout">Log out</button>
+    </div>
+  </header>
+
+  <div id="drawer-overlay" class="drawer-overlay"></div>
+  <nav id="drawer" class="drawer" aria-label="Main navigation">
+    <div class="drawer__header">
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="drawer__logo" />
+      <button type="button" class="modal-close" id="drawer-close" aria-label="Close menu" data-i18n-aria="topbar.closeMenu">&times;</button>
+    </div>
+    <ul id="drawer-nav-list" class="drawer__nav"></ul>
+  </nav>
+
+  <main class="dashboard">
+    <section class="users-panel">
+      <div class="users-panel__header">
+        <div>
+          <h1 data-i18n="forwardedOut.title">Forwarded by Me</h1>
+          <p data-i18n="forwardedOut.subtitle">Cases you forwarded to someone else, so you can track where they are now.</p>
+        </div>
+      </div>
+
+      <div id="cases-error" class="form-error" role="alert" hidden></div>
+
+      <div id="cases-list"></div>
+      <div id="cases-loading" class="users-empty" data-i18n="loading.cases">Loading cases…</div>
+      <div id="cases-empty" class="users-empty" hidden></div>
+    </section>
+  </main>
+
+  <script src="js/i18n.js"></script>
+  <script>window.CASE_VIEW = 'out';</script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/cases.js"></script>
+</body>
+</html>

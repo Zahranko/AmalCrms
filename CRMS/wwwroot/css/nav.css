@@ -1,0 +1,231 @@
+body {
+  background: var(--bg);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: #ffffff;
+  box-shadow: 0 2px 12px -6px rgba(10, 58, 92, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.topbar__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar__logo {
+  height: 36px;
+}
+
+.topbar__user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar__user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.badge {
+  background: rgba(41, 171, 226, 0.12);
+  color: var(--navy-700);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.btn-logout {
+  border: 1.5px solid #e1e8ee;
+  background: #ffffff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-logout:hover {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+/* ---------- Burger button ---------- */
+
+.btn-burger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid #e1e8ee;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.btn-burger:hover {
+  border-color: var(--blue-500);
+}
+
+.btn-burger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--navy-900);
+  border-radius: 2px;
+}
+
+/* ---------- Drawer ---------- */
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 28, 41, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 150;
+}
+
+.drawer-overlay--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 280px;
+  max-width: 84vw;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-card);
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 0;
+  overflow-y: auto;
+}
+
+.drawer--open {
+  transform: translateX(0);
+}
+
+.drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px 18px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #f1f5f8;
+}
+
+.drawer__logo {
+  height: 30px;
+}
+
+.drawer__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 20px 14px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #f1f5f8;
+}
+
+.drawer__user-name {
+  font-weight: 600;
+  color: var(--navy-900);
+  font-size: 14px;
+}
+
+.drawer__nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drawer__nav a {
+  display: block;
+  padding: 12px 20px;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.drawer__nav a:hover {
+  background: #f4f8fb;
+  color: var(--blue-500);
+}
+
+.drawer__nav a.active {
+  border-left-color: var(--blue-500);
+  background: rgba(41, 171, 226, 0.08);
+  color: var(--navy-700);
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    padding: 14px 16px;
+  }
+
+  .topbar__user-info {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+}
+
+.btn-lang {
+  background: transparent;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  margin-right: 6px;
+}
+.btn-lang:hover {
+  background: var(--hover, rgba(0,0,0,0.05));
+}
+.login-lang-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+}

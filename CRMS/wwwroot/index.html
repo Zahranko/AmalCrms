@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Al Amal Hospital | CRMS Sign In</title>
+  <link rel="icon" type="image/webp" href="amal-logo.webp" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="page">
+    <section class="brand-panel">
+      <div class="brand-panel__glow"></div>
+      <div class="brand-panel__content">
+        <img src="amal-logo.webp" alt="Al Amal Hospital" class="brand-logo" />
+        <h1 data-i18n="login.brandTitle">Clinical Resource &amp; Management System</h1>
+        <p data-i18n="login.brandSubtitle">Secure access for hospital staff. Sign in with the credentials provided by your administrator.</p>
+
+        <ul class="brand-features">
+          <li>
+            <span class="brand-features__icon">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.4 2.6 5 6.1 5c2 0 3.4 1.1 4 2.1.6-1 2-2.1 4-2.1 3.5 0 5.1 3.4 3.6 6.8C19.5 16.4 12 21 12 21z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </span>
+            <span data-i18n="login.feature1">Patient &amp; case records, always in sync</span>
+          </li>
+          <li>
+            <span class="brand-features__icon">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12h4l2-7 4 14 2-7h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span data-i18n="login.feature2">Real-time monitoring for every department</span>
+          </li>
+          <li>
+            <span class="brand-features__icon">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </span>
+            <span data-i18n="login.feature3">Role-based access, protected end to end</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="form-panel">
+      <button id="lang-toggle" class="btn-lang login-lang-toggle">العربية</button>
+      <div class="form-card">
+        <div class="form-card__header">
+          <img src="amal-logo.webp" alt="Al Amal Hospital" class="form-card__logo" />
+          <h2 data-i18n="login.title">Welcome back</h2>
+          <p data-i18n="login.subtitle">Sign in to continue to your dashboard</p>
+        </div>
+
+        <form id="login-form" novalidate>
+          <div class="field">
+            <label for="username" data-i18n="login.username">Username</label>
+            <div class="field__control">
+              <svg class="field__icon" viewBox="0 0 24 24" fill="none"><path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zM4 21c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <input type="text" id="username" name="username" placeholder="Enter your username" data-i18n-placeholder="login.usernamePlaceholder" autocomplete="username" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="password" data-i18n="login.password">Password</label>
+            <div class="field__control">
+              <svg class="field__icon" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 1 1 8 0v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <input type="password" id="password" name="password" placeholder="Enter your password" data-i18n-placeholder="login.passwordPlaceholder" autocomplete="current-password" required />
+              <button type="button" class="field__toggle" id="toggle-password" aria-label="Show password" data-i18n-aria="login.showPassword">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div id="form-error" class="form-error" role="alert" hidden></div>
+
+          <button type="submit" class="btn-submit" id="submit-btn">
+            <span class="btn-submit__label" data-i18n="login.signIn">Sign In</span>
+            <span class="btn-submit__spinner" hidden></span>
+          </button>
+        </form>
+
+        <p class="form-card__footer" data-i18n="login.footer">Need an account? Contact your system administrator.</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>
