@@ -8,6 +8,9 @@ class AppDropdownField extends StatelessWidget {
   final String value;
   final List<String> options;
   final ValueChanged<String> onChanged;
+  // Optional display labels parallel to `options` (e.g. "Hospital Manager"
+  // for the value "HospitalManager"). Falls back to the raw option string.
+  final List<String>? optionLabels;
 
   const AppDropdownField({
     super.key,
@@ -15,6 +18,7 @@ class AppDropdownField extends StatelessWidget {
     required this.value,
     required this.options,
     required this.onChanged,
+    this.optionLabels,
   });
 
   @override
@@ -40,7 +44,11 @@ class AppDropdownField extends StatelessWidget {
               style: const TextStyle(fontSize: 14.5, color: AppColors.ink, fontFamily: 'Poppins'),
               dropdownColor: Colors.white,
               borderRadius: BorderRadius.circular(14),
-              items: options.map((o) => DropdownMenuItem(value: o, child: Text(o))).toList(),
+              items: options
+                  .asMap()
+                  .entries
+                  .map((e) => DropdownMenuItem(value: e.value, child: Text(optionLabels?[e.key] ?? e.value)))
+                  .toList(),
               onChanged: (v) {
                 if (v != null) onChanged(v);
               },

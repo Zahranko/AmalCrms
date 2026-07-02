@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../format.dart';
 import '../models/admin_stats.dart';
 import '../models/app_notification.dart';
 import '../models/app_user.dart';
@@ -9,6 +10,7 @@ import '../models/case_detail.dart';
 import '../models/case_summary.dart';
 import '../models/department.dart';
 import '../models/doctor.dart';
+import '../models/hospital_manager_stats.dart';
 import '../models/procedure.dart';
 import '../models/referral_source.dart';
 import '../models/user_session.dart';
@@ -29,12 +31,17 @@ class UnauthorizedException extends ApiException {
 }
 
 class ApiService {
+  // One shared client for the whole app so TCP connections are kept alive and
+  // reused across requests, instead of paying a fresh handshake per call (the
+  // top-level http.get/post helpers close the connection every time).
+  static final http.Client _client = http.Client();
+
   Future<UserSession> login(String username, String password) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/auth/login');
 
     http.Response response;
     try {
-      response = await http.post(
+      response = await _client.post(
         uri,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'username': username, 'password': password}),
@@ -62,8 +69,12 @@ class ApiService {
     String path, {
     String? token,
     Map<String, dynamic>? body,
+    Map<String, String>? query,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}$path');
+    var uri = Uri.parse('${ApiConfig.baseUrl}$path');
+    if (query != null && query.isNotEmpty) {
+      uri = uri.replace(queryParameters: query);
+    }
     final headers = {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
@@ -74,19 +85,19 @@ class ApiService {
     try {
       switch (method) {
         case 'GET':
-          response = await http.get(uri, headers: headers);
+          response = await _client.get(uri, headers: headers);
           break;
         case 'POST':
-          response = await http.post(uri, headers: headers, body: encodedBody);
+          response = await _client.post(uri, headers: headers, body: encodedBody);
           break;
         case 'PUT':
-          response = await http.put(uri, headers: headers, body: encodedBody);
+          response = await _client.put(uri, headers: headers, body: encodedBody);
           break;
         case 'PATCH':
-          response = await http.patch(uri, headers: headers, body: encodedBody);
+          response = await _client.patch(uri, headers: headers, body: encodedBody);
           break;
         case 'DELETE':
-          response = await http.delete(uri, headers: headers, body: encodedBody);
+          response = await _client.delete(uri, headers: headers, body: encodedBody);
           break;
         default:
           throw ArgumentError('Unsupported method $method');
@@ -138,6 +149,17 @@ class ApiService {
   Future<AdminStats> getAdminStats(String token) async {
     final data = await _request('GET', '/admin/stats', token: token);
     return AdminStats.fromJson(data as Map<String, dynamic>);
+  }
+
+  // ---------- Hospital Manager ----------
+
+  Future<HospitalManagerStats> getHospitalManagerStats(String token, {DateTime? from, DateTime? to}) async {
+    final query = <String, String>{
+      if (from != null) 'from': toApiDate(from),
+      if (to != null) 'to': toApiDate(to),
+    };
+    final data = await _request('GET', '/hospital-manager/stats', token: token, query: query);
+    return HospitalManagerStats.fromJson(data as Map<String, dynamic>);
   }
 
   // ---------- Users ----------

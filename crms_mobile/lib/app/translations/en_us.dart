@@ -7,6 +7,7 @@ const Map<String, String> enUs = {
   'nav.forwardedByMe': 'Forwarded by Me',
   'nav.manageLists': 'Manage Lists',
   'nav.userManagement': 'User Management',
+  'nav.hospitalReport': 'Hospital Report',
 
   // TOPBAR / DRAWER
   'topbar.logout': 'Log out',
@@ -43,6 +44,7 @@ const Map<String, String> enUs = {
   'role.employee': 'Employee',
   'role.manager': 'Manager',
   'role.admin': 'Admin',
+  'role.hospitalManager': 'Hospital Manager',
 
   // COMMON ACTIONS
   'action.view': 'View',
@@ -142,16 +144,16 @@ const Map<String, String> enUs = {
   'case.couldNotReopen': 'Could not reopen',
 
   // TIMELINE
-  'timeline.created': '{actor} created the case',
-  'timeline.forwarded': '{actor} forwarded the case to {target}',
-  'timeline.forwardAccepted': '{actor} accepted the forward',
-  'timeline.forwardDeclined': '{actor} declined the forward',
-  'timeline.claimed': '{actor} claimed this case',
-  'timeline.reopened': '{actor} reopened this case',
-  'timeline.followUp': '{actor} set status to {status}',
-  'timeline.dept': 'Dept: {name}',
-  'timeline.doctor': 'Doctor: {name}',
-  'timeline.date': 'Date: {date}',
+  'timeline.created': '@actor created the case',
+  'timeline.forwarded': '@actor forwarded the case to @target',
+  'timeline.forwardAccepted': '@actor accepted the forward',
+  'timeline.forwardDeclined': '@actor declined the forward',
+  'timeline.claimed': '@actor claimed this case',
+  'timeline.reopened': '@actor reopened this case',
+  'timeline.followUp': '@actor set status to @status',
+  'timeline.dept': 'Dept: @name',
+  'timeline.doctor': 'Doctor: @name',
+  'timeline.date': 'Date: @date',
 
   // NEW CASE
   'newCase.title': 'New Case',
@@ -227,8 +229,8 @@ const Map<String, String> enUs = {
   'manageLists.editProc': 'Edit Procedure',
   'listItem.name': 'Name',
   'listItem.errorName': 'Name must be at least 2 characters.',
-  'confirm.enableMsg': 'Re-enable "{name}"? It will be selectable again.',
-  'confirm.disableMsg': 'Disable "{name}"? It will no longer be selectable.',
+  'confirm.enableMsg': 'Re-enable "@name"? It will be selectable again.',
+  'confirm.disableMsg': 'Disable "@name"? It will no longer be selectable.',
 
   // USER MANAGEMENT
   'users.title': 'User Management',
@@ -248,8 +250,8 @@ const Map<String, String> enUs = {
   'resetPassword.errorPassword': 'Password must be at least 6 characters.',
   'confirmUser.enableTitle': 'Re-enable account',
   'confirmUser.disableTitle': 'Disable account',
-  'confirmUser.enableMsg': "Re-enable {username}'s account? They will be able to sign in again.",
-  'confirmUser.disableMsg': "Disable {username}'s account? They will no longer be able to sign in.",
+  'confirmUser.enableMsg': "Re-enable @username's account? They will be able to sign in again.",
+  'confirmUser.disableMsg': "Disable @username's account? They will no longer be able to sign in.",
 
   // ADMIN DASHBOARD
   'admin.stats': 'Summary',
@@ -262,6 +264,23 @@ const Map<String, String> enUs = {
   'admin.noData': 'No data yet.',
   'admin.viewAllCases': 'View All Cases',
   'admin.manageUsers': 'Manage Users',
+
+  // HOSPITAL MANAGER DASHBOARD
+  'hospitalManager.title': 'Hospital Report',
+  'hospitalManager.subtitle': 'Ticket volume and success rate by department and doctor.',
+  'hospitalManager.departments': 'By Department',
+  'hospitalManager.doctors': 'By Doctor',
+  'hospitalManager.tickets': 'Tickets',
+  'hospitalManager.filterThisMonth': 'This Month',
+  'hospitalManager.filterLastMonth': 'Last Month',
+  'hospitalManager.filterAllTime': 'All Time',
+  'hospitalManager.filterCustom': 'Custom',
+  'hospitalManager.reportPeriod': 'Report period',
+  'hospitalManager.allTime': 'All time',
+  'hospitalManager.exportHint': 'Need to print or export this report? Open the dashboard on a computer.',
+
+  // EMPTY STATES
+  'empty.pullToRefresh': 'Pull down to refresh.',
 
   // LANGUAGE
   'lang.toggle': 'العربية',

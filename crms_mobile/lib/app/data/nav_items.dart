@@ -18,10 +18,12 @@ class NavItems {
     NavItem(route: Routes.adminDashboard, labelKey: 'nav.dashboard', roles: ['Admin']),
     NavItem(route: Routes.dashboard, labelKey: 'nav.cases', roles: ['Admin']),
     NavItem(route: Routes.dashboard, labelKey: 'nav.dashboard', roles: ['Employee', 'Manager']),
-    NavItem(route: Routes.newCase, labelKey: 'nav.newCase'),
-    NavItem(route: Routes.forwardedCases, labelKey: 'nav.forwardedToMe'),
-    NavItem(route: Routes.forwardedByMe, labelKey: 'nav.forwardedByMe'),
+    NavItem(route: Routes.newCase, labelKey: 'nav.newCase', roles: ['Employee', 'Manager', 'Admin']),
+    NavItem(route: Routes.forwardedCases, labelKey: 'nav.forwardedToMe', roles: ['Employee', 'Manager', 'Admin']),
+    NavItem(route: Routes.forwardedByMe, labelKey: 'nav.forwardedByMe', roles: ['Employee', 'Manager', 'Admin']),
     NavItem(route: Routes.manageLists, labelKey: 'nav.manageLists', roles: ['Admin']),
     NavItem(route: Routes.userManage, labelKey: 'nav.userManagement', roles: ['Admin']),
+    NavItem(route: Routes.hospitalManagerDashboard, labelKey: 'nav.dashboard', roles: ['HospitalManager']),
+    NavItem(route: Routes.hospitalManagerDashboard, labelKey: 'nav.hospitalReport', roles: ['Admin']),
   ];
 }

@@ -7,6 +7,7 @@ const Map<String, String> arAr = {
   'nav.forwardedByMe': 'المُحوَّل منّي',
   'nav.manageLists': 'إدارة القوائم',
   'nav.userManagement': 'إدارة المستخدمين',
+  'nav.hospitalReport': 'تقرير المستشفى',
 
   // TOPBAR / DRAWER
   'topbar.logout': 'تسجيل الخروج',
@@ -43,6 +44,7 @@ const Map<String, String> arAr = {
   'role.employee': 'موظف',
   'role.manager': 'مدير',
   'role.admin': 'مدير النظام',
+  'role.hospitalManager': 'مدير المستشفى',
 
   // COMMON ACTIONS
   'action.view': 'عرض',
@@ -142,16 +144,16 @@ const Map<String, String> arAr = {
   'case.couldNotReopen': 'تعذّر إعادة الفتح',
 
   // TIMELINE
-  'timeline.created': 'أنشأ {actor} الحالة',
-  'timeline.forwarded': 'حوّل {actor} الحالة إلى {target}',
-  'timeline.forwardAccepted': 'قبل {actor} التحويل',
-  'timeline.forwardDeclined': 'رفض {actor} التحويل',
-  'timeline.claimed': 'استلم {actor} هذه الحالة',
-  'timeline.reopened': 'أعاد {actor} فتح هذه الحالة',
-  'timeline.followUp': 'غيّر {actor} الحالة إلى {status}',
-  'timeline.dept': 'القسم: {name}',
-  'timeline.doctor': 'الطبيب: {name}',
-  'timeline.date': 'التاريخ: {date}',
+  'timeline.created': 'أنشأ @actor الحالة',
+  'timeline.forwarded': 'حوّل @actor الحالة إلى @target',
+  'timeline.forwardAccepted': 'قبل @actor التحويل',
+  'timeline.forwardDeclined': 'رفض @actor التحويل',
+  'timeline.claimed': 'استلم @actor هذه الحالة',
+  'timeline.reopened': 'أعاد @actor فتح هذه الحالة',
+  'timeline.followUp': 'غيّر @actor الحالة إلى @status',
+  'timeline.dept': 'القسم: @name',
+  'timeline.doctor': 'الطبيب: @name',
+  'timeline.date': 'التاريخ: @date',
 
   // NEW CASE
   'newCase.title': 'حالة جديدة',
@@ -227,8 +229,8 @@ const Map<String, String> arAr = {
   'manageLists.editProc': 'تعديل إجراء',
   'listItem.name': 'الاسم',
   'listItem.errorName': 'يجب أن يتكون الاسم من حرفين على الأقل.',
-  'confirm.enableMsg': 'إعادة تفعيل "{name}"؟ ستصبح قابلة للاختيار مجدداً.',
-  'confirm.disableMsg': 'تعطيل "{name}"؟ لن تكون قابلة للاختيار.',
+  'confirm.enableMsg': 'إعادة تفعيل "@name"؟ ستصبح قابلة للاختيار مجدداً.',
+  'confirm.disableMsg': 'تعطيل "@name"؟ لن تكون قابلة للاختيار.',
 
   // USER MANAGEMENT
   'users.title': 'إدارة المستخدمين',
@@ -248,8 +250,8 @@ const Map<String, String> arAr = {
   'resetPassword.errorPassword': 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.',
   'confirmUser.enableTitle': 'إعادة تفعيل الحساب',
   'confirmUser.disableTitle': 'تعطيل الحساب',
-  'confirmUser.enableMsg': 'إعادة تفعيل حساب {username}؟ سيتمكن من تسجيل الدخول مجدداً.',
-  'confirmUser.disableMsg': 'تعطيل حساب {username}؟ لن يتمكن من تسجيل الدخول.',
+  'confirmUser.enableMsg': 'إعادة تفعيل حساب @username؟ سيتمكن من تسجيل الدخول مجدداً.',
+  'confirmUser.disableMsg': 'تعطيل حساب @username؟ لن يتمكن من تسجيل الدخول.',
 
   // ADMIN DASHBOARD
   'admin.stats': 'ملخص',
@@ -262,6 +264,23 @@ const Map<String, String> arAr = {
   'admin.noData': 'لا توجد بيانات بعد.',
   'admin.viewAllCases': 'عرض جميع الحالات',
   'admin.manageUsers': 'إدارة المستخدمين',
+
+  // HOSPITAL MANAGER DASHBOARD
+  'hospitalManager.title': 'تقرير المستشفى',
+  'hospitalManager.subtitle': 'عدد الحالات ونسبة النجاح لكل قسم وطبيب.',
+  'hospitalManager.departments': 'حسب القسم',
+  'hospitalManager.doctors': 'حسب الطبيب',
+  'hospitalManager.tickets': 'الحالات',
+  'hospitalManager.filterThisMonth': 'هذا الشهر',
+  'hospitalManager.filterLastMonth': 'الشهر الماضي',
+  'hospitalManager.filterAllTime': 'كل الوقت',
+  'hospitalManager.filterCustom': 'مخصص',
+  'hospitalManager.reportPeriod': 'فترة التقرير',
+  'hospitalManager.allTime': 'كل الوقت',
+  'hospitalManager.exportHint': 'هل تحتاج لطباعة أو تصدير هذا التقرير؟ افتح لوحة التحكم من جهاز حاسوب.',
+
+  // EMPTY STATES
+  'empty.pullToRefresh': 'اسحب للأسفل للتحديث.',
 
   // LANGUAGE
   'lang.toggle': 'English',

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -48,6 +49,8 @@ class CaseDetailView extends GetView<CaseDetailController> {
   }
 }
 
+// ─── Body ────────────────────────────────────────────────────────────────────
+
 class _CaseBody extends GetView<CaseDetailController> {
   final CaseDetail c;
   const _CaseBody({required this.c});
@@ -59,17 +62,19 @@ class _CaseBody extends GetView<CaseDetailController> {
     return RefreshIndicator(
       onRefresh: controller.load,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
         children: [
+          // Patient name + status pill
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: Text(
                   c.name,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: AppColors.navy900),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.navy900),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(color: meta.background, borderRadius: BorderRadius.circular(999)),
@@ -77,19 +82,27 @@ class _CaseBody extends GetView<CaseDetailController> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+          // Actions
           _Actions(),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
+          // Detail card
           _DetailCard(c: c),
-          const SizedBox(height: 20),
-          Text('case.timeline'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.navy900)),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
+          // Timeline
+          Text(
+            'case.timeline'.tr,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.navy900, letterSpacing: 0.2),
+          ),
+          const SizedBox(height: 12),
           _Timeline(history: c.history),
         ],
       ),
     );
   }
 }
+
+// ─── Actions ─────────────────────────────────────────────────────────────────
 
 class _Actions extends GetView<CaseDetailController> {
   static const _btnShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)));
@@ -110,7 +123,6 @@ class _Actions extends GetView<CaseDetailController> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Primary — Follow-up always shown full-width
           FilledButton.icon(
             onPressed: () => _openFollowUp(context),
             icon: const Icon(Icons.edit_note, size: 19),
@@ -120,7 +132,6 @@ class _Actions extends GetView<CaseDetailController> {
               shape: _btnShape,
             ),
           ),
-          // Secondary actions
           if (hasSecondary) ...[
             const SizedBox(height: 10),
             Wrap(
@@ -252,6 +263,8 @@ class _Actions extends GetView<CaseDetailController> {
   }
 }
 
+// ─── Detail card ─────────────────────────────────────────────────────────────
+
 class _DetailCard extends StatelessWidget {
   final CaseDetail c;
   const _DetailCard({required this.c});
@@ -278,13 +291,39 @@ class _DetailCard extends StatelessWidget {
           : c.assignedToUsername!]);
     if (c.forwardedToUsername != null) rows.add(['case.pendingForwardTo'.tr, c.forwardedToUsername!]);
     rows.add(['case.created'.tr, formatDateTime(c.createdAt)]);
+    if (c.description.isNotEmpty) rows.add(['case.description'.tr, c.description]);
 
     return Column(
       children: [
-        for (final r in rows) _DetailRow(label: r[0], value: r[1]),
-        if (c.description.isNotEmpty)
-          _DetailRow(label: 'case.description'.tr, value: c.description, multiline: true),
-        if (c.clinicSignature != null) _DetailSignature(dataUrl: c.clinicSignature!),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (int i = 0; i < rows.length; i++) ...[
+                _DetailRow(label: rows[i][0], value: rows[i][1]),
+                if (i < rows.length - 1)
+                  Divider(height: 1, indent: 14, endIndent: 14, color: Colors.grey.shade100),
+              ],
+            ],
+          ),
+        ),
+        if (c.clinicSignature != null) ...[
+          const SizedBox(height: 10),
+          _DetailSignature(dataUrl: c.clinicSignature!),
+        ],
       ],
     );
   }
@@ -293,35 +332,23 @@ class _DetailCard extends StatelessWidget {
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
-  final bool multiline;
-  const _DetailRow({required this.label, required this.value, this.multiline = false});
+  const _DetailRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(8),
-        border: const Border(left: BorderSide(color: AppColors.blue500, width: 3)),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.7,
-              color: AppColors.blue500,
-            ),
+            label,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.muted, letterSpacing: 0.3),
           ),
           const SizedBox(height: 3),
           Text(
             value,
-            style: const TextStyle(fontSize: 14, color: AppColors.ink, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontSize: 14.5, color: AppColors.ink, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -329,43 +356,67 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-class _DetailSignature extends StatelessWidget {
+class _DetailSignature extends StatefulWidget {
   final String dataUrl;
   const _DetailSignature({required this.dataUrl});
 
   @override
+  State<_DetailSignature> createState() => _DetailSignatureState();
+}
+
+class _DetailSignatureState extends State<_DetailSignature> {
+  // Decoded once per data URL instead of on every rebuild (Obx rebuilds the
+  // whole detail body after each action, and the PNG can be sizeable).
+  late Uint8List bytes = _decode();
+
+  Uint8List _decode() => base64Decode(widget.dataUrl.split(',').last);
+
+  @override
+  void didUpdateWidget(_DetailSignature oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.dataUrl != widget.dataUrl) bytes = _decode();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bytes = base64Decode(dataUrl.split(',').last);
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(8),
-        border: const Border(left: BorderSide(color: AppColors.blue500, width: 3)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'case.signature'.tr.toUpperCase(),
-            style: const TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.7,
-              color: AppColors.blue500,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 11, 14, 6),
+            child: Text(
+              'case.signature'.tr,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.muted, letterSpacing: 0.3),
             ),
           ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.memory(bytes, fit: BoxFit.contain),
+          Divider(height: 1, color: Colors.grey.shade100),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.memory(bytes, fit: BoxFit.contain, gaplessPlayback: true),
+            ),
           ),
         ],
       ),
     );
   }
 }
+
+// ─── Timeline ─────────────────────────────────────────────────────────────────
 
 class _Timeline extends StatelessWidget {
   final List<CaseAction> history;
@@ -375,17 +426,23 @@ class _Timeline extends StatelessWidget {
   Widget build(BuildContext context) {
     if (history.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Text('case.noHistory'.tr, style: const TextStyle(color: AppColors.muted)),
       );
     }
-    return Column(children: history.map((a) => _TimelineItem(a: a)).toList());
+    return Column(
+      children: [
+        for (int i = 0; i < history.length; i++)
+          _TimelineItem(a: history[i], isLast: i == history.length - 1),
+      ],
+    );
   }
 }
 
 class _TimelineItem extends StatelessWidget {
   final CaseAction a;
-  const _TimelineItem({required this.a});
+  final bool isLast;
+  const _TimelineItem({required this.a, required this.isLast});
 
   String get _title {
     final actor = a.actorUsername ?? 'Someone';
@@ -408,6 +465,23 @@ class _TimelineItem extends StatelessWidget {
     }
   }
 
+  Color get _dotColor {
+    switch (a.type) {
+      case 'Created':
+        return AppColors.navy700;
+      case 'Claimed':
+        return AppColors.blue500;
+      case 'Forwarded':
+      case 'ForwardAccepted':
+      case 'ForwardDeclined':
+        return const Color(0xFF9333ea);
+      case 'Reopened':
+        return const Color(0xFFf59e0b);
+      default:
+        return caseStatusMeta(a.resultingStatus ?? '').color;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final metaBits = <String>[];
@@ -415,28 +489,64 @@ class _TimelineItem extends StatelessWidget {
     if (a.doctorName != null) metaBits.add('timeline.doctor'.trParams({'name': a.doctorName!}));
     if (a.actionDate != null) metaBits.add('timeline.date'.trParams({'date': formatDate(a.actionDate!)}));
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 18),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(_title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.ink)),
-          if (metaBits.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(metaBits.join(' · '), style: const TextStyle(fontSize: 12.5, color: AppColors.muted)),
-          ],
-          if (a.note != null && a.note!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(a.note!, style: const TextStyle(fontSize: 13.5, color: AppColors.ink)),
-          ],
-          const SizedBox(height: 6),
-          Text(formatDateTime(a.createdAt), style: const TextStyle(fontSize: 11.5, color: AppColors.muted)),
+          // Dot + connector
+          Column(
+            children: [
+              Container(
+                width: 11,
+                height: 11,
+                margin: const EdgeInsets.only(top: 3),
+                decoration: BoxDecoration(color: _dotColor, shape: BoxShape.circle),
+              ),
+              if (!isLast)
+                Container(
+                  width: 2,
+                  height: 18,
+                  margin: const EdgeInsets.only(top: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 12),
+          // Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _title,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.ink),
+                ),
+                if (metaBits.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    metaBits.join(' · '),
+                    style: const TextStyle(fontSize: 12.5, color: AppColors.muted),
+                  ),
+                ],
+                if (a.note != null && a.note!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    a.note!,
+                    style: const TextStyle(fontSize: 13, color: AppColors.ink),
+                  ),
+                ],
+                const SizedBox(height: 4),
+                Text(
+                  formatDateTime(a.createdAt),
+                  style: const TextStyle(fontSize: 11.5, color: AppColors.muted),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

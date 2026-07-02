@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using CRMS.Data.DTOs.Cases;
+using CRMS.Data.Models;
 using CRMS.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ namespace CRMS.Controllers;
 
 [ApiController]
 [Route("api/cases")]
-[Authorize]
+[Authorize(Roles = $"{nameof(Role.Employee)},{nameof(Role.Manager)},{nameof(Role.Admin)}")]
 public class CasesController : ControllerBase
 {
     private readonly ICaseService _caseService;
@@ -19,7 +20,7 @@ public class CasesController : ControllerBase
     }
 
     private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    private bool IsAdmin => User.IsInRole("Admin");
+    private bool IsAdmin => User.IsInRole(nameof(Role.Admin));
 
     [HttpPost]
     public Task<ActionResult<CaseDto>> Create(CreateCaseDto request) =>
@@ -69,7 +70,7 @@ public class CasesController : ControllerBase
         Run(() => _caseService.FollowUpAsync(id, CurrentUserId, request));
 
     [HttpPost("{id:int}/reopen")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = nameof(Role.Admin))]
     public Task<ActionResult<CaseDetailDto>> Reopen(int id) =>
         Run(() => _caseService.ReopenAsync(id, CurrentUserId));
 

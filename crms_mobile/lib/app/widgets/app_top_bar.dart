@@ -6,6 +6,10 @@ import '../controllers/notification_center_controller.dart';
 import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 
+// "HospitalManager" is the first multi-word role in the app — give it a
+// translated, spaced label; other roles read fine as their raw value.
+String _roleLabel(String role) => role == 'HospitalManager' ? 'role.hospitalManager'.tr : role;
+
 /// Mirrors the .topbar in nav.css - logo, username + role badge, logout.
 /// The hamburger/drawer icon is supplied automatically by Scaffold when a
 /// `drawer` is set, so it isn't built manually here.
@@ -44,7 +48,7 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    session.role,
+                    _roleLabel(session.role),
                     style: const TextStyle(color: AppColors.navy700, fontSize: 11.5, fontWeight: FontWeight.w600),
                   ),
                 ),

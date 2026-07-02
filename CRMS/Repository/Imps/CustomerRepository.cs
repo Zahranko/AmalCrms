@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using CRMS.Data.DBContext;
 using CRMS.Data.Models;
 using CRMS.Repository.Interfaces;
@@ -27,6 +28,29 @@ public class CustomerRepository : ICustomerRepository
 
     private static IQueryable<Customer> ExcludeCompleted(IQueryable<Customer> q) =>
         q.Where(c => c.Status != CustomerStatus.Success && c.Status != CustomerStatus.Failed);
+
+    // 'from'/'to' are calendar dates (e.g. from a date picker) in the users'
+    // local time zone (same as the server's — single-site deployment), and 'to'
+    // is inclusive of its whole day. CreatedAt is stored in UTC, so convert each
+    // day boundary to UTC before comparing — otherwise cases created within a
+    // few hours of midnight land in the wrong day/month bucket.
+    private static IQueryable<Customer> ApplyDateRange(IQueryable<Customer> q, DateTime? from, DateTime? to)
+    {
+        if (from.HasValue)
+        {
+            var fromUtc = ToUtcDayStart(from.Value);
+            q = q.Where(c => c.CreatedAt >= fromUtc);
+        }
+        if (to.HasValue)
+        {
+            var toExclusiveUtc = ToUtcDayStart(to.Value.AddDays(1));
+            q = q.Where(c => c.CreatedAt < toExclusiveUtc);
+        }
+        return q;
+    }
+
+    private static DateTime ToUtcDayStart(DateTime date) =>
+        DateTime.SpecifyKind(date.Date, DateTimeKind.Local).ToUniversalTime();
 
     public async Task AddAsync(Customer customer)
     {
@@ -97,9 +121,9 @@ public class CustomerRepository : ICustomerRepository
 
     public Task<int> CountAllAsync() => _context.Customers.CountAsync();
 
-    public async Task<Dictionary<CustomerStatus, int>> GetStatusCountsAsync()
+    public async Task<Dictionary<CustomerStatus, int>> GetStatusCountsAsync(DateTime? from = null, DateTime? to = null)
     {
-        var groups = await _context.Customers
+        var groups = await ApplyDateRange(_context.Customers, from, to)
             .GroupBy(c => c.Status)
             .Select(g => new { Status = g.Key, Count = g.Count() })
             .ToListAsync();
@@ -129,6 +153,33 @@ public class CustomerRepository : ICustomerRepository
             })
             .ToListAsync();
         return groups.Select(g => (g.UserId, g.Total, g.Success, g.Failed)).ToList();
+    }
+
+    public Task<List<(int DepartmentId, int Total, int Success, int Failed)>> GetCaseCountsByDepartmentAsync(DateTime? from = null, DateTime? to = null) =>
+        GetCaseCountsGroupedAsync(c => c.DepartmentId, from, to);
+
+    public Task<List<(int DoctorId, int Total, int Success, int Failed)>> GetCaseCountsByDoctorAsync(DateTime? from = null, DateTime? to = null) =>
+        GetCaseCountsGroupedAsync(c => c.DoctorId, from, to);
+
+    // Groups cases by a nullable FK (department/doctor); rows without that FK
+    // fall into the null group, which is dropped after the query.
+    private async Task<List<(int Key, int Total, int Success, int Failed)>> GetCaseCountsGroupedAsync(
+        Expression<Func<Customer, int?>> keySelector, DateTime? from, DateTime? to)
+    {
+        var groups = await ApplyDateRange(_context.Customers, from, to)
+            .GroupBy(keySelector)
+            .Select(g => new
+            {
+                g.Key,
+                Total = g.Count(),
+                Success = g.Count(c => c.Status == CustomerStatus.Success),
+                Failed = g.Count(c => c.Status == CustomerStatus.Failed)
+            })
+            .ToListAsync();
+        return groups
+            .Where(g => g.Key.HasValue)
+            .Select(g => (g.Key!.Value, g.Total, g.Success, g.Failed))
+            .ToList();
     }
 
     public Task SaveChangesAsync() => _context.SaveChangesAsync();

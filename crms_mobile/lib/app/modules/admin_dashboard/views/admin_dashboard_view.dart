@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../data/models/admin_stats.dart';
 import '../../../routes/app_routes.dart';
 import '../../../theme/app_colors.dart';
+import '../../../widgets/app_card.dart';
 import '../../../widgets/app_shell_scaffold.dart';
 import '../../../widgets/error_banner.dart';
 import '../controllers/admin_dashboard_controller.dart';
@@ -201,14 +202,9 @@ class _ReferralRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
       child: Row(
         children: [
           Expanded(
@@ -244,14 +240,9 @@ class _EmployeeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rateColor = _rateColor(stat.percent);
-    return Container(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
       child: Row(
         children: [
           Expanded(

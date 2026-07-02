@@ -6,7 +6,9 @@ import '../../../data/dial_codes.dart';
 import '../../../data/models/case_summary.dart';
 import '../../../routes/app_routes.dart';
 import '../../../theme/app_colors.dart';
+import '../../../widgets/app_card.dart';
 import '../../../widgets/app_shell_scaffold.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../widgets/error_banner.dart';
 import '../controllers/cases_controller.dart';
 
@@ -53,22 +55,26 @@ class CasesView extends GetView<CasesController> {
                 }
 
                 final cases = controller.visibleCases;
+                final hasError = controller.errorMessage.value != null;
 
-                return ListView(
+                return ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
-                  children: [
-                    if (controller.errorMessage.value != null)
-                      ErrorBanner(controller.errorMessage.value!),
-                    if (cases.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 60),
-                        child: Center(
-                          child: Text('cases.noResults'.tr, style: const TextStyle(color: AppColors.muted)),
-                        ),
-                      )
-                    else
-                      ...cases.map((c) => _CaseCard(caseItem: c)),
-                  ],
+                  itemCount: (hasError ? 1 : 0) + (cases.isEmpty ? 1 : cases.length),
+                  itemBuilder: (context, index) {
+                    if (hasError && index == 0) {
+                      return ErrorBanner(controller.errorMessage.value!);
+                    }
+                    final i = hasError ? index - 1 : index;
+                    if (cases.isEmpty) {
+                      return EmptyState(
+                        icon: Icons.search_off_rounded,
+                        title: 'cases.noResults'.tr,
+                        hint: 'empty.pullToRefresh'.tr,
+                      );
+                    }
+                    final c = cases[i];
+                    return _CaseCard(key: ValueKey(c.id), caseItem: c);
+                  },
                 );
               }),
             ),
@@ -148,94 +154,113 @@ class _SearchField extends GetView<CasesController> {
 
 class _CaseCard extends GetView<CasesController> {
   final CaseSummary caseItem;
-  const _CaseCard({required this.caseItem});
+  const _CaseCard({super.key, required this.caseItem});
 
   @override
   Widget build(BuildContext context) {
     final meta = caseStatusMeta(caseItem.status);
     final assigned = caseItem.assignedToUsername;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () => Get.toNamed(Routes.caseDetail, arguments: caseItem.id),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      caseItem.name,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.ink),
-                    ),
+    return AppCard(
+      padding: EdgeInsets.zero,
+      onTap: () => Get.toNamed(Routes.caseDetail, arguments: caseItem.id),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: status-tinted initials avatar, name + phone, status pill(s).
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+            child: Row(
+              children: [
+                _Avatar(name: caseItem.name, color: meta.color, background: meta.background),
+                const SizedBox(width: 11),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        caseItem.name,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.navy900),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        formatPhone(caseItem.phoneCountryCode, caseItem.phoneNumber),
+                        style: const TextStyle(fontSize: 12.5, color: AppColors.muted),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  if (caseItem.forwardedByUsername != null) ...[
-                    _Pill(
-                      label: 'badge.forwarded'.tr,
-                      color: const Color(0xFF6D28D9),
-                      background: const Color(0xFFEDE9FE),
-                    ),
-                    const SizedBox(width: 6),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _Pill(label: meta.label, color: meta.color, background: meta.background),
+                    if (caseItem.forwardedByUsername != null) ...[
+                      const SizedBox(height: 4),
+                      _Pill(
+                        label: 'badge.forwarded'.tr,
+                        color: const Color(0xFF6D28D9),
+                        background: const Color(0xFFEDE9FE),
+                      ),
+                    ],
                   ],
-                  _Pill(label: meta.label, color: meta.color, background: meta.background),
-                ],
-              ),
-              const SizedBox(height: 8),
-              if (caseItem.procedure != null && caseItem.procedure!.isNotEmpty)
-                _ProcedureLabel(caseItem.procedure!),
-              const SizedBox(height: 6),
-              _InfoRow(icon: Icons.phone_outlined, text: formatPhone(caseItem.phoneCountryCode, caseItem.phoneNumber)),
-              _InfoRow(icon: Icons.local_hospital_outlined, text: caseItem.department ?? '—'),
-              _InfoRow(
-                icon: Icons.badge_outlined,
-                text: '${'case.createdBy'.tr} ${caseItem.createdByUsername ?? '—'}',
-              ),
-              _InfoRow(
-                icon: Icons.assignment_ind_outlined,
-                text: assigned == null || assigned.isEmpty
-                    ? 'case.unassigned'.tr
-                    : '${'case.assignedTo'.tr} $assigned',
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  TextButton.icon(
-                    onPressed: () => Get.toNamed(Routes.caseDetail, arguments: caseItem.id),
-                    icon: const Icon(Icons.visibility_outlined, size: 17),
-                    label: Text('action.view'.tr),
-                  ),
-                  const Spacer(),
-                  if (!controller.isMine(caseItem))
-                    Obx(() {
-                      final busy = controller.claimingId.value == caseItem.id;
-                      return FilledButton(
-                        onPressed: busy ? null : () => _claim(context),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
-                        ),
-                        child: busy
-                            ? const SizedBox(
-                                width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : Text('action.assignToMe'.tr),
-                      );
-                    }),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
-        ),
+          Divider(height: 1, color: Colors.grey.shade100),
+          // Metadata
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (caseItem.procedure != null && caseItem.procedure!.isNotEmpty)
+                  _InfoRow(icon: Icons.medical_services_outlined, text: caseItem.procedure!),
+                _InfoRow(icon: Icons.local_hospital_outlined, text: caseItem.department ?? '—'),
+                _InfoRow(
+                  icon: Icons.badge_outlined,
+                  text: '${'case.createdBy'.tr} ${caseItem.createdByUsername ?? '—'}',
+                ),
+                _InfoRow(
+                  icon: Icons.assignment_ind_outlined,
+                  text: assigned == null || assigned.isEmpty
+                      ? 'case.unassigned'.tr
+                      : '${'case.assignedTo'.tr} $assigned',
+                ),
+              ],
+            ),
+          ),
+          // Actions
+          Padding(
+            padding: const EdgeInsets.fromLTRB(6, 2, 10, 8),
+            child: Row(
+              children: [
+                TextButton.icon(
+                  onPressed: () => Get.toNamed(Routes.caseDetail, arguments: caseItem.id),
+                  icon: const Icon(Icons.visibility_outlined, size: 17),
+                  label: Text('action.view'.tr),
+                ),
+                const Spacer(),
+                if (!controller.isMine(caseItem))
+                  Obx(() {
+                    final busy = controller.claimingId.value == caseItem.id;
+                    return FilledButton(
+                      onPressed: busy ? null : () => _claim(context),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                      ),
+                      child: busy
+                          ? const SizedBox(
+                              width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : Text('action.assignToMe'.tr),
+                    );
+                  }),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -246,6 +271,33 @@ class _CaseCard extends GetView<CasesController> {
       Get.snackbar('cases.couldNotAssign'.tr, error,
           snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.white, colorText: AppColors.ink);
     }
+  }
+}
+
+/// Circular initials avatar tinted with the case's status colour.
+class _Avatar extends StatelessWidget {
+  final String name;
+  final Color color;
+  final Color background;
+  const _Avatar({required this.name, required this.color, required this.background});
+
+  String get _initials {
+    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '؟';
+    final first = parts.first.characters.first;
+    final second = parts.length > 1 ? parts[1].characters.first : '';
+    return '$first$second'.toUpperCase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 42,
+      height: 42,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: background, shape: BoxShape.circle),
+      child: Text(_initials, style: TextStyle(color: color, fontWeight: FontWeight.w700, fontSize: 14.5)),
+    );
   }
 }
 
@@ -261,26 +313,6 @@ class _Pill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(999)),
       child: Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
-    );
-  }
-}
-
-class _ProcedureLabel extends StatelessWidget {
-  final String text;
-  const _ProcedureLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F0FE),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(color: Color(0xFF1A56DB), fontSize: 12, fontWeight: FontWeight.w500),
-      ),
     );
   }
 }

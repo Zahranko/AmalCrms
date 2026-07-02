@@ -6,6 +6,8 @@ import '../../../data/format.dart';
 import '../../../data/models/app_notification.dart';
 import '../../../routes/app_routes.dart';
 import '../../../theme/app_colors.dart';
+import '../../../widgets/app_card.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../widgets/error_banner.dart';
 
 class NotificationsView extends StatelessWidget {
@@ -41,18 +43,30 @@ class NotificationsView extends StatelessWidget {
             if (center.isLoading.value && center.notifications.isEmpty) {
               return const Center(child: CircularProgressIndicator());
             }
-            return ListView(
+            final items = center.notifications;
+            final hasError = center.errorMessage.value != null;
+
+            return ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              children: [
-                if (center.errorMessage.value != null) ErrorBanner(center.errorMessage.value!),
-                if (center.notifications.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 80),
-                    child: Center(child: Text('notifications.empty'.tr, style: const TextStyle(color: AppColors.muted))),
-                  )
-                else
-                  ...center.notifications.map((n) => _NotificationTile(n: n, center: center)),
-              ],
+              itemCount: (hasError ? 1 : 0) + (items.isEmpty ? 1 : items.length),
+              itemBuilder: (context, index) {
+                if (hasError && index == 0) {
+                  return ErrorBanner(center.errorMessage.value!);
+                }
+                final i = hasError ? index - 1 : index;
+                if (items.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    child: EmptyState(
+                      icon: Icons.notifications_none_rounded,
+                      title: 'notifications.empty'.tr,
+                      hint: 'empty.pullToRefresh'.tr,
+                    ),
+                  );
+                }
+                final n = items[i];
+                return _NotificationTile(key: ValueKey(n.id), n: n, center: center);
+              },
             );
           }),
         ),
@@ -64,7 +78,7 @@ class NotificationsView extends StatelessWidget {
 class _NotificationTile extends StatelessWidget {
   final AppNotification n;
   final NotificationCenterController center;
-  const _NotificationTile({required this.n, required this.center});
+  const _NotificationTile({super.key, required this.n, required this.center});
 
   @override
   Widget build(BuildContext context) {
@@ -79,13 +93,11 @@ class _NotificationTile extends StatelessWidget {
         child: const Icon(Icons.delete_outline, color: Colors.white),
       ),
       onDismissed: (_) => center.delete(n.id),
-      child: Container(
+      child: AppCard(
         margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: n.isRead ? Colors.white : AppColors.blue500.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: n.isRead ? Colors.grey.shade200 : AppColors.blue500.withValues(alpha: 0.3)),
-        ),
+        padding: EdgeInsets.zero,
+        color: n.isRead ? Colors.white : const Color(0xFFF2F7FE),
+        borderColor: n.isRead ? null : AppColors.blue500.withValues(alpha: 0.3),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
           leading: Icon(

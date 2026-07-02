@@ -1,5 +1,6 @@
 using CRMS.Data.DTOs.Admin;
 using CRMS.Data.DTOs.Cases;
+using CRMS.Data.DTOs.HospitalManager;
 using CRMS.Data.Models;
 using CRMS.Repository.Interfaces;
 using CRMS.Services.Interfaces;
@@ -15,7 +16,7 @@ public class CaseService : ICaseService
     private readonly IProcedureRepository _procedureRepository;
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IDoctorRepository _doctorRepository;
-    private readonly INotificationRepository _notificationRepository;
+    private readonly INotificationService _notificationService;
 
     public CaseService(
         ICustomerRepository customerRepository,
@@ -25,7 +26,7 @@ public class CaseService : ICaseService
         IProcedureRepository procedureRepository,
         IDepartmentRepository departmentRepository,
         IDoctorRepository doctorRepository,
-        INotificationRepository notificationRepository)
+        INotificationService notificationService)
     {
         _customerRepository = customerRepository;
         _caseActionRepository = caseActionRepository;
@@ -34,7 +35,7 @@ public class CaseService : ICaseService
         _procedureRepository = procedureRepository;
         _departmentRepository = departmentRepository;
         _doctorRepository = doctorRepository;
-        _notificationRepository = notificationRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<CaseDto> CreateAsync(CreateCaseDto request, int userId)
@@ -100,24 +101,25 @@ public class CaseService : ICaseService
         var creator = await _userRepository.GetByIdAsync(creatorUserId);
         var creatorName = creator?.Username ?? "Someone";
 
+        // HospitalManager is stats-only and cannot open cases, so a CaseCreated
+        // notification would be a dead end for that role.
         var recipients = (await _userRepository.GetAllAsync())
-            .Where(u => u.IsActive && u.Id != creatorUserId && u.NotifyOnNewCase)
+            .Where(u => u.IsActive && u.Id != creatorUserId && u.NotifyOnNewCase && u.Role != Role.HospitalManager)
             .ToList();
 
         if (recipients.Count == 0) return;
 
-        foreach (var recipient in recipients)
-        {
-            _notificationRepository.Add(new Notification
+        var notifications = recipients
+            .Select(recipient => new Notification
             {
                 UserId = recipient.Id,
                 CustomerId = customer.Id,
                 Type = NotificationType.CaseCreated,
                 Message = $"New case \"{customer.Name}\" created by {creatorName} is waiting to be assigned."
-            });
-        }
+            })
+            .ToList();
 
-        await _notificationRepository.SaveChangesAsync();
+        await _notificationService.AddAndPushManyAsync(notifications);
     }
 
     public async Task<List<CaseDto>> GetAllAsync(bool excludeCompleted = false) =>
@@ -190,14 +192,13 @@ public class CaseService : ICaseService
         await _customerRepository.SaveChangesAsync();
 
         var actor = await _userRepository.GetByIdAsync(userId);
-        _notificationRepository.Add(new Notification
+        await _notificationService.AddAndPushAsync(new Notification
         {
             UserId = request.ToUserId,
             CustomerId = customer.Id,
             Type = NotificationType.CaseForwarded,
             Message = $"{actor?.Username ?? "Someone"} forwarded case \"{customer.Name}\" to you."
         });
-        await _notificationRepository.SaveChangesAsync();
 
         return await ReloadDetail(customer.Id);
     }
@@ -227,14 +228,13 @@ public class CaseService : ICaseService
         if (previousOwnerId.HasValue)
         {
             var actor = await _userRepository.GetByIdAsync(userId);
-            _notificationRepository.Add(new Notification
+            await _notificationService.AddAndPushAsync(new Notification
             {
                 UserId = previousOwnerId.Value,
                 CustomerId = customer.Id,
                 Type = NotificationType.ForwardAccepted,
                 Message = $"{actor?.Username ?? "Someone"} accepted case \"{customer.Name}\" that you forwarded."
             });
-            await _notificationRepository.SaveChangesAsync();
         }
 
         return await ReloadDetail(customer.Id);
@@ -263,14 +263,13 @@ public class CaseService : ICaseService
         if (previousOwnerId.HasValue)
         {
             var actor = await _userRepository.GetByIdAsync(userId);
-            _notificationRepository.Add(new Notification
+            await _notificationService.AddAndPushAsync(new Notification
             {
                 UserId = previousOwnerId.Value,
                 CustomerId = customer.Id,
                 Type = NotificationType.ForwardDeclined,
                 Message = $"{actor?.Username ?? "Someone"} declined case \"{customer.Name}\" that you forwarded."
             });
-            await _notificationRepository.SaveChangesAsync();
         }
 
         return await ReloadDetail(customer.Id);
@@ -428,6 +427,50 @@ public class CaseService : ICaseService
             Employees = empStats
         };
     }
+
+    public async Task<HospitalManagerStatsDto> GetHospitalManagerStatsAsync(DateTime? from, DateTime? to)
+    {
+        var statusCounts = await _customerRepository.GetStatusCountsAsync(from, to);
+        var deptCounts = await _customerRepository.GetCaseCountsByDepartmentAsync(from, to);
+        var doctorCounts = await _customerRepository.GetCaseCountsByDoctorAsync(from, to);
+        var allDepartments = await _departmentRepository.GetAllAsync();
+        var allDoctors = await _doctorRepository.GetAllAsync();
+
+        // Every case has exactly one status, so the range total is the sum of
+        // the per-status counts — no separate count query needed.
+        var total = statusCounts.Values.Sum();
+        var successCount = statusCounts.GetValueOrDefault(CustomerStatus.Success);
+        var failedCount = statusCounts.GetValueOrDefault(CustomerStatus.Failed);
+
+        return new HospitalManagerStatsDto
+        {
+            From = from,
+            To = to,
+            TotalCases = total,
+            SuccessCount = successCount,
+            FailedCount = failedCount,
+            SuccessPercent = total > 0 ? Math.Round((double)successCount / total * 100, 1) : 0,
+            FailedPercent = total > 0 ? Math.Round((double)failedCount / total * 100, 1) : 0,
+            Departments = ToGroupStats(deptCounts, allDepartments.ToDictionary(d => d.Id, d => d.Name)),
+            Doctors = ToGroupStats(doctorCounts, allDoctors.ToDictionary(d => d.Id, d => d.Name))
+        };
+    }
+
+    private static List<GroupStatDto> ToGroupStats(
+        List<(int Id, int Total, int Success, int Failed)> counts,
+        Dictionary<int, string> namesById) =>
+        counts
+            .Select(c => new GroupStatDto
+            {
+                Id = c.Id,
+                Name = namesById.GetValueOrDefault(c.Id, "Unknown"),
+                TotalCases = c.Total,
+                SuccessCount = c.Success,
+                FailedCount = c.Failed,
+                SuccessRate = c.Total > 0 ? Math.Round((double)c.Success / c.Total * 100, 1) : 0
+            })
+            .OrderByDescending(d => d.TotalCases)
+            .ToList();
 
     public async Task<List<CaseDto>> GetAllCasesAsync(string? search, int? assignedToUserId, bool todayOnly) =>
         (await _customerRepository.GetAllFilteredAsync(search, assignedToUserId, todayOnly)).Select(ToDto).ToList();

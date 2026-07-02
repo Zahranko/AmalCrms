@@ -19,6 +19,9 @@ class CasesController extends GetxController {
 
   final Rx<CaseFilter> filter = CaseFilter.all.obs;
   final RxString search = ''.obs;
+  // Debounced copy of `search` that the list actually filters on, so the whole
+  // list isn't re-filtered and re-rendered on every keystroke.
+  final RxString _debouncedSearch = ''.obs;
   final RxnInt claimingId = RxnInt();
 
   String get _token => authController.session.value!.token;
@@ -27,6 +30,7 @@ class CasesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    debounce(search, (String v) => _debouncedSearch.value = v, time: const Duration(milliseconds: 250));
     loadCases();
   }
 
@@ -64,7 +68,7 @@ class CasesController extends GetxController {
       }
     });
 
-    final term = search.value.trim().toLowerCase();
+    final term = _debouncedSearch.value.trim().toLowerCase();
     if (term.isNotEmpty) {
       result = result.where((c) {
         final phone = '${c.phoneCountryCode}${c.phoneNumber}'.toLowerCase();

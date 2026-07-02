@@ -7,7 +7,8 @@ import '../../../../widgets/app_dropdown_field.dart';
 import '../../../../widgets/app_text_field.dart';
 import '../../controllers/users_controller.dart';
 
-const _roles = ['Employee', 'Manager', 'Admin'];
+const _roles = ['Employee', 'Manager', 'Admin', 'HospitalManager'];
+const _roleLabels = ['Employee', 'Manager', 'Admin', 'Hospital Manager'];
 
 /// Mirrors #user-modal / openUserModal() in dashboard.js.
 Future<void> showUserFormDialog(BuildContext context, UsersController controller, {AppUser? user}) {
@@ -75,6 +76,7 @@ Future<void> showUserFormDialog(BuildContext context, UsersController controller
                   label: 'userForm.role'.tr,
                   value: role,
                   options: _roles,
+                  optionLabels: _roleLabels,
                   onChanged: (value) => setState(() => role = value),
                 ),
                 if (isEdit) ...[

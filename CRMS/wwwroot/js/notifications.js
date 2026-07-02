@@ -154,6 +154,56 @@
     }
   });
 
+  // ── Real-time updates via SignalR ──────────────────────────────────────────
+  // Load the SignalR client JS (served from our own wwwroot so no internet
+  // dependency) then open a WebSocket connection to the hub. If the hub is
+  // unreachable — at load or permanently later — we fall back to the old
+  // 30-second poll.
+  let pollTimer = null;
+  function startPolling() {
+    if (!pollTimer) pollTimer = setInterval(refreshCount, 30000);
+  }
+
+  function startSignalR() {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl('/hubs/notifications', {
+        accessTokenFactory: () => session.token
+      })
+      .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+      .configureLogging(signalR.LogLevel.Warning)
+      .build();
+
+    // Re-fetch the count rather than incrementing locally so the badge also
+    // self-corrects after reads/deletes made from another tab or the mobile app.
+    connection.on('NewNotification', () => {
+      refreshCount();
+      if (!panel.hidden) loadList();
+    });
+
+    // Pushes sent while the socket was down are not replayed — catch up.
+    connection.onreconnected(() => {
+      refreshCount();
+      if (!panel.hidden) loadList();
+    });
+
+    // Fires once automatic reconnect gives up — without this the bell would
+    // freeze until a full page reload.
+    connection.onclose(() => startPolling());
+
+    connection.start().catch(() => startPolling());
+  }
+
+  const signalRScript = document.createElement('script');
+  // Loaded as a module so the bundle's top-level `var t, e` (webpack UMD
+  // bootstrap vars) stay scoped to the module instead of clobbering the
+  // app's global `t()` i18n helper on window. It still does `self.signalR = …`
+  // explicitly, so window.signalR is unaffected.
+  signalRScript.type = 'module';
+  signalRScript.src = '/js/signalr.min.js';
+  signalRScript.onload = startSignalR;
+  signalRScript.onerror = () => startPolling();
+  document.head.appendChild(signalRScript);
+
+  // Initial badge count (immediate, before SignalR connects).
   refreshCount();
-  setInterval(refreshCount, 30000);
 })();

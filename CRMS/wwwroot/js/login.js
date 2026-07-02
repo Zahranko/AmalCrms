@@ -9,7 +9,7 @@ const togglePasswordBtn = document.getElementById('toggle-password');
 
 const existingSession = getSession();
 if (existingSession) {
-  window.location.href = 'dashboard.html';
+  window.location.href = homePageForRole(existingSession.role);
 }
 
 togglePasswordBtn.addEventListener('click', () => {
@@ -50,7 +50,7 @@ form.addEventListener('submit', async (event) => {
   try {
     const session = await apiLogin(username, password);
     saveSession(session);
-    window.location.href = 'dashboard.html';
+    window.location.href = homePageForRole(session.role);
   } catch (err) {
     setError(err.message || t('login.errorGeneric'));
   } finally {

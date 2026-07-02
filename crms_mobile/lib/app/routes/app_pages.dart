@@ -10,6 +10,8 @@ import '../modules/forwarded_by_me/bindings/forwarded_by_me_binding.dart';
 import '../modules/forwarded_by_me/views/forwarded_by_me_view.dart';
 import '../modules/forwarded_cases/bindings/forwarded_cases_binding.dart';
 import '../modules/forwarded_cases/views/forwarded_cases_view.dart';
+import '../modules/hospital_manager_dashboard/bindings/hospital_manager_dashboard_binding.dart';
+import '../modules/hospital_manager_dashboard/views/hospital_manager_dashboard_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/manage_lists/bindings/manage_lists_binding.dart';
@@ -35,6 +37,11 @@ class AppPages {
       name: Routes.adminDashboard,
       page: () => const AdminDashboardView(),
       binding: AdminDashboardBinding(),
+    ),
+    GetPage(
+      name: Routes.hospitalManagerDashboard,
+      page: () => const HospitalManagerDashboardView(),
+      binding: HospitalManagerDashboardBinding(),
     ),
     GetPage(
       name: Routes.dashboard,

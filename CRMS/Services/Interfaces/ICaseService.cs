@@ -1,5 +1,6 @@
 using CRMS.Data.DTOs.Admin;
 using CRMS.Data.DTOs.Cases;
+using CRMS.Data.DTOs.HospitalManager;
 
 namespace CRMS.Services.Interfaces;
 
@@ -22,4 +23,7 @@ public interface ICaseService
     Task<AdminStatsDto> GetStatsAsync();
     Task<List<CaseDto>> GetAllCasesAsync(string? search, int? assignedToUserId, bool todayOnly);
     Task<CaseDetailDto> AdminFollowUpAsync(int caseId, int userId, FollowUpDto request);
+
+    // Hospital Manager
+    Task<HospitalManagerStatsDto> GetHospitalManagerStatsAsync(DateTime? from, DateTime? to);
 }

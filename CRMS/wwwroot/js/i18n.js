@@ -13,6 +13,7 @@ const TRANSLATIONS = {
     'nav.forwardedByMe': 'Forwarded by Me',
     'nav.manageLists': 'Manage Lists',
     'nav.userManagement': 'User Management',
+    'nav.hospitalReport': 'Hospital Report',
 
     // TOPBAR
     'topbar.hi': 'Hi, {name}',
@@ -55,6 +56,7 @@ const TRANSLATIONS = {
     'role.employee': 'Employee',
     'role.manager': 'Manager',
     'role.admin': 'Admin',
+    'role.hospitalManager': 'Hospital Manager',
 
     // COMMON ACTIONS
     'action.view': 'View',
@@ -140,6 +142,21 @@ const TRANSLATIONS = {
     'admin.empty.noCases': 'No cases in the system yet.',
     'stat.ofTotal': '{n}% of total',
     'stat.ofCreated': '{n}% of created',
+
+    // HOSPITAL MANAGER DASHBOARD
+    'hospitalManager.title': 'Hospital Report',
+    'hospitalManager.subtitle': 'Ticket volume and success rate by department and doctor.',
+    'hospitalManager.departments': 'By Department',
+    'hospitalManager.doctors': 'By Doctor',
+    'hospitalManager.tickets': 'Tickets',
+    'hospitalManager.filterThisMonth': 'This Month',
+    'hospitalManager.filterLastMonth': 'Last Month',
+    'hospitalManager.filterAllTime': 'All Time',
+    'hospitalManager.filterCustom': 'Custom',
+    'hospitalManager.reportPeriod': 'Report period',
+    'hospitalManager.allTime': 'All time',
+    'hospitalManager.export': 'Export Excel',
+    'hospitalManager.print': 'Print',
 
     // FORWARDED BADGES
     'badge.forwarded': 'Forwarded',
@@ -336,6 +353,7 @@ const TRANSLATIONS = {
     'nav.forwardedByMe': 'المُحوَّل منّي',
     'nav.manageLists': 'إدارة القوائم',
     'nav.userManagement': 'إدارة المستخدمين',
+    'nav.hospitalReport': 'تقرير المستشفى',
 
     // TOPBAR
     'topbar.hi': 'مرحباً، {name}',
@@ -378,6 +396,7 @@ const TRANSLATIONS = {
     'role.employee': 'موظف',
     'role.manager': 'مدير',
     'role.admin': 'مدير النظام',
+    'role.hospitalManager': 'مدير المستشفى',
 
     // COMMON ACTIONS
     'action.view': 'عرض',
@@ -463,6 +482,21 @@ const TRANSLATIONS = {
     'admin.empty.noCases': 'لا توجد حالات في النظام بعد.',
     'stat.ofTotal': '{n}% من الإجمالي',
     'stat.ofCreated': '{n}% من المُنشأة',
+
+    // HOSPITAL MANAGER DASHBOARD
+    'hospitalManager.title': 'تقرير المستشفى',
+    'hospitalManager.subtitle': 'عدد الحالات ونسبة النجاح لكل قسم وطبيب.',
+    'hospitalManager.departments': 'حسب القسم',
+    'hospitalManager.doctors': 'حسب الطبيب',
+    'hospitalManager.tickets': 'الحالات',
+    'hospitalManager.filterThisMonth': 'هذا الشهر',
+    'hospitalManager.filterLastMonth': 'الشهر الماضي',
+    'hospitalManager.filterAllTime': 'كل الوقت',
+    'hospitalManager.filterCustom': 'مخصص',
+    'hospitalManager.reportPeriod': 'فترة التقرير',
+    'hospitalManager.allTime': 'كل الوقت',
+    'hospitalManager.export': 'تصدير إكسل',
+    'hospitalManager.print': 'طباعة',
 
     // FORWARDED BADGES
     'badge.forwarded': 'مُحوَّل',

@@ -6,7 +6,9 @@ import '../../../data/dial_codes.dart';
 import '../../../data/models/case_summary.dart';
 import '../../../routes/app_routes.dart';
 import '../../../theme/app_colors.dart';
+import '../../../widgets/app_card.dart';
 import '../../../widgets/app_shell_scaffold.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../widgets/error_banner.dart';
 import '../controllers/forwarded_by_me_controller.dart';
 
@@ -44,24 +46,27 @@ class ForwardedByMeView extends GetView<ForwardedByMeController> {
                 if (controller.isLoading.value && controller.cases.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                return ListView(
+                final cases = controller.cases;
+                final hasError = controller.errorMessage.value != null;
+
+                return ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
-                  children: [
-                    if (controller.errorMessage.value != null)
-                      ErrorBanner(controller.errorMessage.value!),
-                    if (controller.cases.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 60),
-                        child: Center(
-                          child: Text(
-                            'forwardedOut.empty'.tr,
-                            style: const TextStyle(color: AppColors.muted),
-                          ),
-                        ),
-                      )
-                    else
-                      ...controller.cases.map((c) => _CaseCard(c: c)),
-                  ],
+                  itemCount: (hasError ? 1 : 0) + (cases.isEmpty ? 1 : cases.length),
+                  itemBuilder: (context, index) {
+                    if (hasError && index == 0) {
+                      return ErrorBanner(controller.errorMessage.value!);
+                    }
+                    final i = hasError ? index - 1 : index;
+                    if (cases.isEmpty) {
+                      return EmptyState(
+                        icon: Icons.outbox_outlined,
+                        title: 'forwardedOut.empty'.tr,
+                        hint: 'empty.pullToRefresh'.tr,
+                      );
+                    }
+                    final c = cases[i];
+                    return _CaseCard(key: ValueKey(c.id), c: c);
+                  },
                 );
               }),
             ),
@@ -74,7 +79,7 @@ class ForwardedByMeView extends GetView<ForwardedByMeController> {
 
 class _CaseCard extends StatelessWidget {
   final CaseSummary c;
-  const _CaseCard({required this.c});
+  const _CaseCard({super.key, required this.c});
 
   // Pending outgoing: I still own it (assignedToUsername = me) and forwardedToUsername is set
   bool get isPending => c.forwardedToUsername != null;
@@ -83,13 +88,9 @@ class _CaseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final meta = caseStatusMeta(c.status);
 
-    return Container(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
+      padding: EdgeInsets.zero,
       child: ListTile(
         contentPadding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
         title: Row(

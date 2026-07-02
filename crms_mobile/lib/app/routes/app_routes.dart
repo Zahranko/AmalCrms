@@ -3,6 +3,7 @@ abstract class Routes {
 
   static const login = '/login';
   static const adminDashboard = '/admin-dashboard';
+  static const hospitalManagerDashboard = '/hospital-manager-dashboard';
   static const dashboard = '/dashboard';
   static const newCase = '/new-case';
   static const caseDetail = '/case-detail';

@@ -43,6 +43,13 @@ function clearSession() {
   localStorage.removeItem('crms.expiresAt');
 }
 
+// Single source of truth for where each role lands after login (used by
+// login.js) and where an off-limits page redirects to (nav.js's
+// enforcePageAccess) — keep those two in sync by definition.
+function homePageForRole(role) {
+  return role === 'HospitalManager' ? 'hospitalManagerDashboard.html' : 'dashboard.html';
+}
+
 function extractErrorMessage(data, fallback) {
   if (!data) return fallback;
   if (data.message) return data.message;
@@ -279,6 +286,38 @@ function apiGetAdminCases() {
 
 function apiAdminFollowUpCase(id, payload) {
   return apiRequest(`/admin/cases/${id}/follow-up`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+// ---------- Hospital Manager ----------
+
+function hmQueryString(from, to) {
+  const params = new URLSearchParams();
+  if (from) params.set('from', from);
+  if (to) params.set('to', to);
+  return params.toString();
+}
+
+function apiGetHospitalManagerStats(from, to) {
+  return apiRequest(`/hospital-manager/stats?${hmQueryString(from, to)}`);
+}
+
+// File download, not JSON — auth is a Bearer token (not a cookie), so a plain
+// <a href> to this endpoint would 401 silently. Fetch as a blob instead.
+async function apiExportHospitalManagerStats(from, to) {
+  const session = getSession();
+  const response = await fetch(`${API_BASE_URL}/hospital-manager/stats/export?${hmQueryString(from, to)}`, {
+    headers: { Authorization: `Bearer ${session.token}` }
+  });
+  if (!response.ok) throw new Error('Failed to generate the report.');
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `hospital-report-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 // ---------- Notifications ----------

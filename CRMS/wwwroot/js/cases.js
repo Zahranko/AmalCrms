@@ -1,5 +1,5 @@
 const CASE_VIEW = window.CASE_VIEW || 'all';
-const session = getSession();
+const caseListSession = getSession();
 
 const VIEW_CONFIG = {
   all: {
@@ -145,7 +145,7 @@ function rowTemplate(c, config) {
   //   - isPending: case has a pending forward (hasPendingForward = true, so current user hasn't accepted yet)
   //   - isReforward: the case was originally MINE before (forwardedByUsername == me) — show actual status, no "Forwarded" badge
   const isPendingIn = currentView === 'in' && c.hasPendingForward;
-  const isReforward = isPendingIn && c.forwardedByUsername === session?.username;
+  const isReforward = isPendingIn && c.forwardedByUsername === caseListSession?.username;
 
   let actionsCell;
   if (isPendingIn) {

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../theme/app_colors.dart';
+import '../../../widgets/app_card.dart';
 import '../../../widgets/app_shell_scaffold.dart';
 import '../../../widgets/confirm_dialog.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../widgets/error_banner.dart';
 import '../../../widgets/status_pill.dart';
 import '../controllers/manage_lists_controller.dart';
@@ -159,10 +161,7 @@ class ManageListsView extends GetView<ManageListsController> {
     }
   }
 
-  Widget _empty(String label) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 50),
-        child: Center(child: Text(label, style: const TextStyle(color: AppColors.muted))),
-      );
+  Widget _empty(String label) => EmptyState(icon: Icons.list_alt_outlined, title: label);
 
   void _add(BuildContext context) {
     switch (controller.tab.value) {
@@ -236,17 +235,10 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 10),
-      elevation: 0,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
-        child: Row(
+      padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
+      child: Row(
           children: [
             Expanded(
               child: Text(name,
@@ -265,8 +257,7 @@ class _Card extends StatelessWidget {
                   size: 19, color: isActive ? AppColors.error : AppColors.blue500),
               onPressed: onToggle,
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

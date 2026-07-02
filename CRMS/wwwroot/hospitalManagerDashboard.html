@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Al Amal Hospital | Hospital Report</title>
+  <link rel="icon" type="image/webp" href="amal-logo.webp" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__left">
+      <button id="menu-toggle" class="btn-burger" aria-label="Open menu" data-i18n-aria="topbar.openMenu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="topbar__logo" />
+    </div>
+    <div class="topbar__user">
+      <div class="topbar__user-info">
+        <span id="welcome-name">—</span>
+        <span id="welcome-role" class="badge">—</span>
+      </div>
+      <button id="lang-toggle" class="btn-lang">العربية</button>
+      <button id="logout-btn" class="btn-logout" data-i18n="topbar.logout">Log out</button>
+    </div>
+  </header>
+
+  <div id="drawer-overlay" class="drawer-overlay"></div>
+  <nav id="drawer" class="drawer" aria-label="Main navigation">
+    <div class="drawer__header">
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="drawer__logo" />
+      <button type="button" class="modal-close" id="drawer-close" aria-label="Close menu" data-i18n-aria="topbar.closeMenu">&times;</button>
+    </div>
+    <ul id="drawer-nav-list" class="drawer__nav"></ul>
+  </nav>
+
+  <main class="dashboard hm-dashboard">
+    <section class="users-panel">
+      <div class="users-panel__header">
+        <div>
+          <h1 data-i18n="hospitalManager.title">Hospital Report</h1>
+          <p data-i18n="hospitalManager.subtitle">Ticket volume and success rate by department and doctor.</p>
+        </div>
+        <div class="hm-header__actions">
+          <button type="button" id="hm-export-btn" class="btn-secondary">
+            <span data-i18n="hospitalManager.export">Export Excel</span>
+          </button>
+          <button type="button" id="hm-print-btn" class="btn-primary">
+            <span data-i18n="hospitalManager.print">Print</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="hm-filter-bar">
+        <div class="cases-view-toggle" id="hm-quick-filters">
+          <button type="button" class="seg-btn seg-btn--active" data-range="month" data-i18n="hospitalManager.filterThisMonth">This Month</button>
+          <button type="button" class="seg-btn" data-range="lastMonth" data-i18n="hospitalManager.filterLastMonth">Last Month</button>
+          <button type="button" class="seg-btn" data-range="all" data-i18n="hospitalManager.filterAllTime">All Time</button>
+          <button type="button" class="seg-btn" data-range="custom" data-i18n="hospitalManager.filterCustom">Custom</button>
+        </div>
+        <div class="hm-custom-range" id="hm-custom-range" hidden>
+          <div class="field hm-date-field">
+            <div class="field__control">
+              <input type="date" id="hm-from" />
+            </div>
+          </div>
+          <span class="hm-range-sep">–</span>
+          <div class="field hm-date-field">
+            <div class="field__control">
+              <input type="date" id="hm-to" />
+            </div>
+          </div>
+          <button type="button" id="hm-apply-range" class="btn-primary" data-i18n="action.confirm">Apply</button>
+        </div>
+      </div>
+
+      <div id="hm-period-label" class="hm-period-label"></div>
+
+      <div id="hm-error" class="form-error" role="alert" hidden></div>
+      <div id="hm-loading" class="users-empty" data-i18n="loading.stats">Loading statistics…</div>
+
+      <div id="hm-content" hidden>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card__label" data-i18n="admin.totalCases">Total Cases</div>
+            <div class="stat-card__value" id="hm-stat-total">—</div>
+          </div>
+          <div class="stat-card stat-card--success">
+            <div class="stat-card__label" data-i18n="status.success">Success</div>
+            <div class="stat-card__value" id="hm-stat-success">—</div>
+            <div class="stat-card__sub" id="hm-stat-success-pct"></div>
+          </div>
+          <div class="stat-card stat-card--failed">
+            <div class="stat-card__label" data-i18n="status.failed">Failed</div>
+            <div class="stat-card__value" id="hm-stat-failed">—</div>
+            <div class="stat-card__sub" id="hm-stat-failed-pct"></div>
+          </div>
+        </div>
+
+        <h2 class="admin-section-title" data-i18n="hospitalManager.departments">By Department</h2>
+        <div id="hm-departments" class="hm-card-grid"></div>
+        <div id="hm-departments-empty" class="users-empty" data-i18n="admin.noData" hidden>No data yet.</div>
+
+        <h2 class="admin-section-title" data-i18n="hospitalManager.doctors">By Doctor</h2>
+        <div id="hm-doctors" class="hm-card-grid"></div>
+        <div id="hm-doctors-empty" class="users-empty" data-i18n="admin.noData" hidden>No data yet.</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/hospitalManagerDashboard.js"></script>
+</body>
+</html>

@@ -29,9 +29,7 @@ Future<void> main() async {
 
   String initialRoute;
   if (authController.isLoggedIn) {
-    initialRoute = authController.session.value!.role == 'Admin'
-        ? Routes.adminDashboard
-        : Routes.dashboard;
+    initialRoute = AuthController.dashboardRouteForRole(authController.session.value!.role);
   } else {
     initialRoute = Routes.login;
   }
@@ -59,6 +57,10 @@ class CrmsApp extends StatelessWidget {
       translations: AppTranslations(),
       locale: initialLocale,
       fallbackLocale: const Locale('en', 'US'),
+      // Fade instead of the default abrupt cut; direction-neutral so it reads
+      // the same in RTL (Arabic) as in LTR.
+      defaultTransition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 220),
       initialRoute: initialRoute,
       getPages: AppPages.pages,
     );

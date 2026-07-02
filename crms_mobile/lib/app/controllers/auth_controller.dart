@@ -37,8 +37,7 @@ class AuthController extends GetxController {
       if (Get.isRegistered<NotificationCenterController>()) {
         Get.find<NotificationCenterController>().start();
       }
-      final dashRoute = result.role == 'Admin' ? Routes.adminDashboard : Routes.dashboard;
-      Get.offAllNamed(dashRoute);
+      Get.offAllNamed(dashboardRouteForRole(result.role));
     } catch (e) {
       errorMessage.value = e.toString();
     } finally {
@@ -53,5 +52,11 @@ class AuthController extends GetxController {
     session.value = null;
     await _storageService.clearSession();
     Get.offAllNamed(Routes.login);
+  }
+
+  static String dashboardRouteForRole(String role) {
+    if (role == 'Admin') return Routes.adminDashboard;
+    if (role == 'HospitalManager') return Routes.hospitalManagerDashboard;
+    return Routes.dashboard;
   }
 }

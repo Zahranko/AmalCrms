@@ -1231,3 +1231,141 @@
     max-height: calc(100vh - 150px);
   }
 }
+
+/* ---------- Hospital Manager Dashboard ---------- */
+
+.hm-header__actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.hm-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.hm-custom-range {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The explicit display above would otherwise defeat the `hidden` attribute
+   (author CSS beats the UA [hidden] rule) — same pattern as .modal-overlay. */
+.hm-custom-range[hidden] {
+  display: none;
+}
+
+.hm-date-field {
+  margin: 0;
+}
+
+.hm-date-field .field__control {
+  min-width: 150px;
+}
+
+.hm-date-field input {
+  padding: 9px 12px;
+  font-size: 13.5px;
+}
+
+.hm-range-sep {
+  color: var(--muted);
+}
+
+.hm-period-label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+
+/* Big glanceable cards instead of dense table rows — the audience for this
+   dashboard is explicitly not comfortable with software, so favor large
+   numbers and color over density. */
+.hm-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.hm-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hm-card__name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--navy-900);
+}
+
+.hm-card__count {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--navy-900);
+  line-height: 1;
+}
+
+.hm-card__count-label {
+  font-size: 11.5px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hm-rate-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.hm-rate-badge--high { background: #dff3e6; color: #1d7d49; }
+.hm-rate-badge--mid { background: #fdf1d8; color: #9a6a00; }
+.hm-rate-badge--low { background: #fbe4e6; color: var(--error); }
+
+.hm-card__breakdown {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+@media (max-width: 600px) {
+  .hm-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print: only the report itself, no app chrome, and always show what date
+   range it covers so a printed page isn't ambiguous. */
+@media print {
+  .topbar,
+  #drawer,
+  #drawer-overlay,
+  .hm-filter-bar,
+  .hm-header__actions {
+    display: none !important;
+  }
+
+  .hm-period-label {
+    display: block !important;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  main.dashboard {
+    padding: 0;
+  }
+}
