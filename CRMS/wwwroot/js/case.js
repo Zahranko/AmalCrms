@@ -22,11 +22,6 @@ let currentCase = null;
 let departments = [];
 let doctors = [];
 
-function escapeHtml(value) {
-  const div = document.createElement('div');
-  div.textContent = value ?? '';
-  return div.innerHTML;
-}
 
 function statusMeta(status) {
   return STATUS_META[status] || { label: status, cls: 'pending' };

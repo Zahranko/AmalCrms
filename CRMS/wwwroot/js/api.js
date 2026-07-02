@@ -98,6 +98,56 @@ function formatPhone(countryCode, number) {
   return `${countryCode} ${number}`;
 }
 
+// ---------- Shared DOM helpers ----------
+// One definition for every page — do not redeclare these per-file (classic
+// scripts share one global scope; duplicate consts are fatal SyntaxErrors).
+
+function escapeHtml(value) {
+  const div = document.createElement('div');
+  div.textContent = value ?? '';
+  return div.innerHTML;
+}
+
+// Delays fn until the user pauses — use for search inputs so the list isn't
+// re-rendered on every keystroke.
+function debounce(fn, delayMs = 250) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delayMs);
+  };
+}
+
+// First letters of the first two words — works for Arabic too (toUpperCase is
+// a no-op there).
+function nameInitials(name) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '؟';
+  const first = [...parts[0]][0] || '';
+  const second = parts.length > 1 ? [...parts[1]][0] || '' : '';
+  return `${first}${second}`.toUpperCase();
+}
+
+// Friendly empty-list placeholder (icon disc + title), mirroring the mobile
+// app's EmptyState widget. `kind` picks the icon.
+const EMPTY_STATE_ICONS = {
+  search: '<path d="M10 2a8 8 0 1 0 4.9 14.3l4.4 4.4 1.4-1.4-4.4-4.4A8 8 0 0 0 10 2Zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z"/><path d="M7.5 9h5v2h-5z"/>',
+  inbox: '<path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm1 2v8h3.6a3.4 3.4 0 0 0 6.8 0H19V6H5Zm0 12h14v-2h-5.2a5.4 5.4 0 0 1-3.6 0H5v2Z"/>',
+  bell: '<path d="M12 2a6 6 0 0 0-6 6v3.6l-1.7 3.4A1 1 0 0 0 5.2 16.5h13.6a1 1 0 0 0 .9-1.5L18 11.6V8a6 6 0 0 0-6-6Zm-2.4 16a2.5 2.5 0 0 0 4.8 0H9.6Z"/>',
+  list: '<path d="M4 5h2v2H4V5Zm4 0h12v2H8V5ZM4 11h2v2H4v-2Zm4 0h12v2H8v-2ZM4 17h2v2H4v-2Zm4 0h12v2H8v-2Z"/>',
+  users: '<path d="M9 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM3 20a6 6 0 0 1 12 0v1H3v-1Zm14.5-9.5a3.5 3.5 0 1 0-2.2-6.2 6 6 0 0 1 .5 5.9c.5.2 1.1.3 1.7.3ZM16 20c0-1.8-.6-3.5-1.6-4.9a6 6 0 0 1 6.6 6V21H16v-1Z"/>'
+};
+
+function emptyStateHtml(kind, title, hint) {
+  const icon = EMPTY_STATE_ICONS[kind] || EMPTY_STATE_ICONS.list;
+  return `
+    <div class="empty-state">
+      <span class="empty-state__icon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${icon}</svg></span>
+      <span class="empty-state__title">${escapeHtml(title)}</span>
+      ${hint ? `<span class="empty-state__hint">${escapeHtml(hint)}</span>` : ''}
+    </div>`;
+}
+
 function apiGetUsers() {
   return apiRequest('/users');
 }

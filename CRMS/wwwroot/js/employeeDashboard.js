@@ -25,12 +25,6 @@ function initEmployeeDashboard() {
   let activeFilter = 'all';
   let searchTerm = '';
 
-  function escapeHtml(v) {
-    const d = document.createElement('div');
-    d.textContent = v ?? '';
-    return d.innerHTML;
-  }
-
   function setError(msg) {
     if (!msg) { errorEl.hidden = true; errorEl.textContent = ''; return; }
     errorEl.hidden = false;
@@ -72,7 +66,8 @@ function initEmployeeDashboard() {
       listEl.innerHTML = '';
       emptyEl.hidden = false;
       const filterLabels = { all: t('dashboard.empty.all'), today: t('dashboard.empty.today'), mine: t('dashboard.empty.mine'), unassigned: t('dashboard.empty.unassigned') };
-      emptyEl.textContent = searchTerm ? t('dashboard.empty.search') : (filterLabels[activeFilter] || t('dashboard.empty.all'));
+      const text = searchTerm ? t('dashboard.empty.search') : (filterLabels[activeFilter] || t('dashboard.empty.all'));
+      emptyEl.innerHTML = emptyStateHtml(searchTerm ? 'search' : 'inbox', text);
       return;
     }
 
@@ -128,7 +123,7 @@ function initEmployeeDashboard() {
       : '';
     return `
       <tr>
-        <td data-label="${t('col.name')}">${escapeHtml(c.name)}</td>
+        <td data-label="${t('col.name')}"><span class="name-cell"><span class="avatar-initials avatar-initials--${meta.cls}">${escapeHtml(nameInitials(c.name))}</span>${escapeHtml(c.name)}</span></td>
         <td data-label="${t('col.procedure')}"><span class="proc-label">${escapeHtml(c.procedure || '—')}</span></td>
         <td data-label="${t('col.department')}">${escapeHtml(c.department || '—')}</td>
         <td data-label="${t('col.phone')}">${escapeHtml(formatPhone(c.phoneCountryCode, c.phoneNumber))}</td>
@@ -169,10 +164,11 @@ function initEmployeeDashboard() {
     });
   });
 
-  // Search
+  // Search — debounced so the table isn't rebuilt on every keystroke.
+  const debouncedRender = debounce(renderList);
   searchInput.addEventListener('input', (e) => {
     searchTerm = e.target.value;
-    renderList();
+    debouncedRender();
   });
 
   loadCases();

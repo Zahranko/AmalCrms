@@ -40,11 +40,6 @@
     FollowUpReminder: 'cases-mine.html'
   };
 
-  function escapeHtml(value) {
-    const div = document.createElement('div');
-    div.textContent = value ?? '';
-    return div.innerHTML;
-  }
 
   function setBadge(count) {
     if (!count) {

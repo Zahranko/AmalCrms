@@ -1348,6 +1348,85 @@
   }
 }
 
+/* ---------- Shared polish (matches the mobile app) ---------- */
+
+/* Soft page entrance instead of an abrupt paint on every navigation. */
+main.dashboard {
+  animation: page-enter 0.24s ease both;
+}
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main.dashboard { animation: none; }
+}
+
+/* Friendly empty-list placeholder — icon disc + title (+ optional hint). */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.empty-state__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(41, 171, 226, 0.08);
+  margin-bottom: 8px;
+}
+
+.empty-state__icon svg {
+  width: 30px;
+  height: 30px;
+  color: rgba(41, 171, 226, 0.55);
+}
+
+.empty-state__title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.empty-state__hint {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* Status-tinted initials avatar shown before the patient name in case tables
+   (mirrors the mobile case card). Colors match the status pills. */
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.avatar-initials {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.avatar-initials--pending { background: rgba(100, 116, 139, 0.14); color: #475569; }
+.avatar-initials--waiting { background: rgba(234, 88, 12, 0.14); color: #b4490d; }
+.avatar-initials--success { background: rgba(34, 160, 95, 0.14); color: #1d7d49; }
+.avatar-initials--failed { background: rgba(214, 69, 80, 0.1); color: var(--error); }
+
 /* Print: only the report itself, no app chrome, and always show what date
    range it covers so a printed page isn't ambiguous. */
 @media print {

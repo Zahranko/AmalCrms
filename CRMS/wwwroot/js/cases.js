@@ -40,12 +40,6 @@ let currentView = CASE_VIEW === 'in' || CASE_VIEW === 'out' ? CASE_VIEW : 'all';
 let currentCases = [];
 let searchTerm = '';
 
-function escapeHtml(value) {
-  const div = document.createElement('div');
-  div.textContent = value ?? '';
-  return div.innerHTML;
-}
-
 function setError(message) {
   if (!message) { errorBox.hidden = true; errorBox.textContent = ''; return; }
   errorBox.hidden = false;
@@ -90,7 +84,9 @@ function renderList() {
   if (!filtered.length) {
     listEl.innerHTML = '';
     emptyState.hidden = false;
-    emptyState.textContent = currentCases.length ? t('cases.empty.search') : t(config.emptyKey);
+    emptyState.innerHTML = currentCases.length
+      ? emptyStateHtml('search', t('cases.empty.search'))
+      : emptyStateHtml('inbox', t(config.emptyKey));
     return;
   }
 
@@ -171,7 +167,7 @@ function rowTemplate(c, config) {
 
   return `
     <tr data-id="${c.id}">
-      <td data-label="${t('col.name')}">${escapeHtml(c.name)}</td>
+      <td data-label="${t('col.name')}"><span class="name-cell"><span class="avatar-initials avatar-initials--${meta.cls}">${escapeHtml(nameInitials(c.name))}</span>${escapeHtml(c.name)}</span></td>
       <td data-label="${t('col.department')}">${escapeHtml(c.department || '—')}</td>
       <td data-label="${t('col.phone')}">${escapeHtml(formatPhone(c.phoneCountryCode, c.phoneNumber))}</td>
       ${assignedCell}
@@ -188,15 +184,15 @@ function setupToolbar() {
 
   const toggleHtml = (CASE_VIEW === 'in' || CASE_VIEW === 'out') ? '' : `
     <div class="cases-view-toggle">
-      <button type="button" class="seg-btn seg-btn--active" data-view="all">All Cases</button>
-      <button type="button" class="seg-btn" data-view="mine">My Cases</button>
+      <button type="button" class="seg-btn seg-btn--active" data-view="all">${t('filter.allCases')}</button>
+      <button type="button" class="seg-btn" data-view="mine">${t('cases.myCases')}</button>
     </div>`;
 
   toolbar.innerHTML = `
     ${toggleHtml}
     <div class="cases-search field">
       <div class="field__control">
-        <input type="search" id="cases-search-input" placeholder="Search by name or phone…" autocomplete="off" />
+        <input type="search" id="cases-search-input" placeholder="${t('search.placeholder')}" autocomplete="off" />
       </div>
     </div>`;
   listEl.parentNode.insertBefore(toolbar, listEl);
@@ -216,9 +212,11 @@ function setupToolbar() {
     });
   }
 
+  // Debounced so the table isn't rebuilt on every keystroke.
+  const debouncedRender = debounce(renderList);
   toolbar.querySelector('#cases-search-input').addEventListener('input', (e) => {
     searchTerm = e.target.value;
-    renderList();
+    debouncedRender();
   });
 }
 

@@ -187,3 +187,14 @@ A `Customer` row **is a "case"** — a patient lead created by an employee, not 
   - **Empty states**: all list screens show `EmptyState` with a contextual icon + "Pull down to refresh" hint (new `empty.pullToRefresh` key in both locales) instead of bare grey text.
   - **Page transitions**: `GetMaterialApp` gains `defaultTransition: Transition.fadeIn` (220ms) — direction-neutral so RTL Arabic reads the same.
   - **i18n fixes on Users screen**: hardcoded English subtitle → `users.subtitle`.tr, "Created" → `users.colCreated`.tr; local `_ErrorBanner` + `_formatDate` duplicates deleted in favor of shared `ErrorBanner`/`format.dart`.
+
+### 2026-07-03
+
+- **Web frontend design + performance pass** (`CRMS/wwwroot` only — mirrors the mobile pass; no backend/API changes):
+  - **Shared DOM helpers in `api.js`**: single global `escapeHtml` (the 8 identical per-file copies deleted — api.js is loaded on every page), `debounce(fn, 250ms)`, `nameInitials(name)`, and `emptyStateHtml(kind, title, hint?)` with an inline-SVG icon map (`search`/`inbox`/`bell`/`list`/`users`).
+  - **Debounced search** on employee dashboard, cases lists, admin dashboard, and manage lists — previously every keystroke rebuilt the whole table innerHTML and re-attached row listeners.
+  - **Empty states**: all list empty messages (`.users-empty` targets on dashboard/cases/manage lists/users/HM dashboard) now render the icon-disc `.empty-state` markup instead of bare grey text.
+  - **Status-tinted initials avatar** (`.name-cell` + `.avatar-initials--<status>` in dashboard.css) before the patient name in the employee-dashboard, cases-list, and admin all-cases tables — matches the mobile case card.
+  - **Page-enter animation**: `main.dashboard` fades/rises in over 240ms (`page-enter` keyframes, disabled under `prefers-reduced-motion`).
+  - **i18n fixes**: `cases.js` toolbar had hardcoded English ("All Cases"/"My Cases" toggle + search placeholder) → now `t('filter.allCases')`/`t('cases.myCases')`/`t('search.placeholder')`; User Management role column shows `roleLabel(user.role)` so HospitalManager reads "Hospital Manager".
+  - Verified with `node --check` on all 9 edited JS files. Backend republished (wwwroot-only change — IIS redeploy just needs the `wwwroot\` copy).

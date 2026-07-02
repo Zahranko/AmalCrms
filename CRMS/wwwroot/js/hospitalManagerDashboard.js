@@ -30,12 +30,6 @@ const printBtn = document.getElementById('hm-print-btn');
 let currentFrom = null;
 let currentTo = null;
 
-function escapeHtml(value) {
-  const div = document.createElement('div');
-  div.textContent = value ?? '';
-  return div.innerHTML;
-}
-
 function formatDateInput(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -92,6 +86,7 @@ function renderCardGrid(container, emptyEl, items) {
   if (!items.length) {
     container.innerHTML = '';
     emptyEl.hidden = false;
+    emptyEl.innerHTML = emptyStateHtml('list', t('admin.noData'));
     return;
   }
   emptyEl.hidden = true;

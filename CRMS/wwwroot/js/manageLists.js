@@ -76,12 +76,6 @@ function activeResource() {
   return RESOURCES[activeTab];
 }
 
-function escapeHtml(value) {
-  const div = document.createElement('div');
-  div.textContent = value ?? '';
-  return div.innerHTML;
-}
-
 function setError(message) {
   if (!message) {
     errorEl.hidden = true;
@@ -140,9 +134,9 @@ function render() {
   if (!filtered.length) {
     tableEl.hidden = true;
     emptyEl.hidden = false;
-    emptyEl.textContent = r.cache.length
-      ? t('manageLists.empty.search')
-      : t(r.emptyKey);
+    emptyEl.innerHTML = r.cache.length
+      ? emptyStateHtml('search', t('manageLists.empty.search'))
+      : emptyStateHtml('list', t(r.emptyKey));
     countEl.textContent = '';
     return;
   }
@@ -197,9 +191,11 @@ tabsEl.addEventListener('click', (e) => {
   loadActive();
 });
 
+// Debounced so the table isn't rebuilt on every keystroke.
+const debouncedListRender = debounce(render);
 searchInput.addEventListener('input', () => {
   searchTerm = searchInput.value;
-  render();
+  debouncedListRender();
 });
 
 addBtn.addEventListener('click', () => openItemModal(activeTab, null));

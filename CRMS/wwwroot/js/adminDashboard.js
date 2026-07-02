@@ -37,12 +37,6 @@ let allCases = [];
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
-function escapeHtml(value) {
-  const div = document.createElement('div');
-  div.textContent = value ?? '';
-  return div.innerHTML;
-}
-
 function statusMeta(status) {
   return STATUS_META[status] || { label: status, cls: 'pending' };
 }
@@ -182,7 +176,9 @@ function renderCases() {
   if (!filtered.length) {
     casesListEl.innerHTML = '';
     casesEmpty.hidden = false;
-    casesEmpty.textContent = allCases.length ? t('admin.empty.cases') : t('admin.empty.noCases');
+    casesEmpty.innerHTML = allCases.length
+      ? emptyStateHtml('search', t('admin.empty.cases'))
+      : emptyStateHtml('inbox', t('admin.empty.noCases'));
     return;
   }
 
@@ -211,7 +207,7 @@ function caseRow(c) {
   const meta = statusMeta(c.status);
   return `
     <tr>
-      <td data-label="${t('col.name')}">${escapeHtml(c.name)}</td>
+      <td data-label="${t('col.name')}"><span class="name-cell"><span class="avatar-initials avatar-initials--${meta.cls}">${escapeHtml(nameInitials(c.name))}</span>${escapeHtml(c.name)}</span></td>
       <td data-label="${t('col.phone')}">${escapeHtml(formatPhone(c.phoneCountryCode, c.phoneNumber))}</td>
       <td data-label="${t('col.source')}">${escapeHtml(c.referralSource || '—')}</td>
       <td data-label="${t('col.status')}"><span class="status-pill status-pill--${meta.cls}">${meta.label}</span></td>
@@ -292,7 +288,7 @@ document.addEventListener('keydown', (e) => {
 
 // ─── Event listeners ──────────────────────────────────────────────────────────
 
-searchInput.addEventListener('input', renderCases);
+searchInput.addEventListener('input', debounce(renderCases));
 userFilter.addEventListener('change', renderCases);
 todayCheckbox.addEventListener('change', renderCases);
 

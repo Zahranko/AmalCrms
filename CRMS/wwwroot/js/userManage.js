@@ -43,6 +43,7 @@ function renderUsersTable(users) {
   if (!users.length) {
     usersTable.hidden = true;
     usersEmpty.hidden = false;
+    usersEmpty.innerHTML = emptyStateHtml('users', t('users.empty'));
     return;
   }
 
@@ -76,7 +77,7 @@ function rowTemplate(user) {
   return `
     <tr>
       <td data-label="${t('col.username')}">${escapeHtml(user.username)}</td>
-      <td data-label="${t('col.role')}">${escapeHtml(user.role)}</td>
+      <td data-label="${t('col.role')}">${escapeHtml(roleLabel(user.role))}</td>
       <td data-label="${t('col.status')}"><span class="status-pill ${statusClass}">${statusLabel}</span></td>
       <td data-label="${t('col.created')}">${createdAt}</td>
       <td data-label="Actions">
@@ -88,12 +89,6 @@ function rowTemplate(user) {
       </td>
     </tr>
   `;
-}
-
-function escapeHtml(value) {
-  const div = document.createElement('div');
-  div.textContent = value;
-  return div.innerHTML;
 }
 
 // ---------- User create/edit modal ----------
