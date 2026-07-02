@@ -7,7 +7,10 @@ workflows:
     instance_type: mac_mini_m2
     working_directory: crms_mobile
     environment:
-      flutter: stable
+      # Pinned to the version this project was built with locally — the iOS
+      # template uses new APIs (FlutterSceneDelegate / implicit engine) that
+      # an older "stable" image would fail to compile.
+      flutter: 3.44.2
       xcode: latest
       cocoapods: default
       ios_signing:
@@ -18,11 +21,16 @@ workflows:
     scripts:
       - name: Flutter pub get
         script: flutter pub get
+      # ios_signing only fetches the certificate + profile onto the builder;
+      # this step applies them to the Xcode project and writes
+      # ~/export_options.plist with the correct signing mapping.
+      - name: Set up code signing
+        script: xcode-project use-profiles
       - name: Build IPA
         script: |
           flutter build ipa \
             --release \
-            --export-options-plist=ios/ExportOptions.plist
+            --export-options-plist=$HOME/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
@@ -41,7 +49,7 @@ workflows:
     instance_type: linux_x2
     working_directory: crms_mobile
     environment:
-      flutter: stable
+      flutter: 3.44.2
       android_signing:
         - crms_keystore              # upload keystore in Codemagic → App settings → Code signing
       vars:
