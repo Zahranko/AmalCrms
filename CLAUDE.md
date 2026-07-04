@@ -203,3 +203,7 @@ A `Customer` row **is a "case"** — a patient lead created by an employee, not 
   - `AppDelegate.swift`: set `UNUserNotificationCenter.current().delegate` in `didFinishLaunchingWithOptions` (+ `import UserNotifications`) — required by flutter_local_notifications for notifications to *present* while the app is foregrounded (the SignalR-push popup case). Without it the IPA builds but iOS popups silently don't show.
   - Verified consistent: bundle id `com.alamal.crms` across all 3 Runner configs, `IPHONEOS_DEPLOYMENT_TARGET = 13.0` matching Podfile `platform :ios, '13.0'`, ATS cleartext + `NSLocalNetworkUsageDescription` present in Info.plist, `SceneDelegate.swift` present to match the `UIApplicationSceneManifest`.
   - **Codemagic dashboard prerequisites (not in the repo)**: Apple Developer Program membership; App Store Connect API key added in Codemagic (Teams → integrations) so automatic signing can fetch/create the ad-hoc profile; target iPhone UDIDs registered in the Apple Developer portal (ad-hoc installs only work on registered devices).
+
+### 2026-07-04
+
+- **Mobile top bar / drawer tweaks**: logout moved from the top bar to the bottom of the nav drawer (red `Icons.logout` ListTile below the language toggle, reuses `topbar.logout` key); top bar now shows only the role badge on the right. Notification bell icon enlarged 23→27. `app_top_bar.dart`, `app_drawer.dart`.

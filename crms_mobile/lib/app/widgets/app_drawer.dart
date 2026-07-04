@@ -78,6 +78,17 @@ class AppDrawer extends StatelessWidget {
               ),
               onTap: () => Get.find<LanguageService>().toggleLanguage(),
             ),
+            ListTile(
+              leading: const Icon(Icons.logout, color: AppColors.error),
+              title: Text(
+                'topbar.logout'.tr,
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.error),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                authController.logout();
+              },
+            ),
           ],
         ),
       ),

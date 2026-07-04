@@ -37,27 +37,19 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
           if (session == null) return const SizedBox.shrink();
 
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.blue500.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    _roleLabel(session.role),
-                    style: const TextStyle(color: AppColors.navy700, fontSize: 11.5, fontWeight: FontWeight.w600),
-                  ),
+            padding: const EdgeInsets.only(right: 12),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.blue500.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
                 ),
-                IconButton(
-                  tooltip: 'topbar.logout'.tr,
-                  icon: const Icon(Icons.logout, size: 20, color: AppColors.muted),
-                  onPressed: authController.logout,
+                child: Text(
+                  _roleLabel(session.role),
+                  style: const TextStyle(color: AppColors.navy700, fontSize: 11.5, fontWeight: FontWeight.w600),
                 ),
-              ],
+              ),
             ),
           );
         }),
@@ -79,7 +71,7 @@ class _NotificationBell extends StatelessWidget {
         children: [
           IconButton(
             tooltip: 'topbar.notifications'.tr,
-            icon: const Icon(Icons.notifications_none_rounded, size: 23, color: AppColors.ink),
+            icon: const Icon(Icons.notifications_none_rounded, size: 27, color: AppColors.ink),
             onPressed: () => Get.toNamed(Routes.notifications),
           ),
           if (count > 0)
