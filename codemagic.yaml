@@ -19,8 +19,17 @@ workflows:
           mkdir -p Payload
           cp -r build/ios/iphoneos/Runner.app Payload/
           zip -r app-unsigned.ipa Payload
+      - name: Debug — locate the IPA
+        script: |
+          echo "Current directory:"
+          pwd
+          echo "Files here:"
+          ls -la
+          echo "Searching whole clone for the ipa:"
+          find $CM_BUILD_DIR -name "*.ipa"
     artifacts:
       - crms_mobile/app-unsigned.ipa
+      - app-unsigned.ipa
     publishing:
       email:
         recipients:
