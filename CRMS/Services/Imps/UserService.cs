@@ -20,7 +20,10 @@ public class UserService : IUserService
     public async Task<List<UserDto>> GetAllAsync()
     {
         var users = await _userRepository.GetAllAsync();
-        return users.Select(ToDto).ToList();
+        var websiteMap = await _userRepository.GetWebsiteIdMapAsync();
+        return users
+            .Select(u => ToDto(u, websiteMap.GetValueOrDefault(u.Id) ?? new List<int>()))
+            .ToList();
     }
 
     public async Task<bool> UsernameExistsAsync(string username) =>
@@ -41,8 +44,9 @@ public class UserService : IUserService
         user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
 
         await _userRepository.AddAsync(user);
+        await _userRepository.SetWebsitesAsync(user.Id, request.WebsiteIds);
 
-        return ToDto(user);
+        return ToDto(user, request.WebsiteIds);
     }
 
     public async Task<UserDto?> UpdateAsync(int id, UpdateUserDto request)
@@ -62,8 +66,9 @@ public class UserService : IUserService
         user.Role = request.Role;
         user.NotifyOnNewCase = request.NotifyOnNewCase;
         await _userRepository.SaveChangesAsync();
+        await _userRepository.SetWebsitesAsync(user.Id, request.WebsiteIds);
 
-        return ToDto(user);
+        return ToDto(user, request.WebsiteIds);
     }
 
     public async Task<bool> ResetPasswordAsync(int id, ResetPasswordDto request)
@@ -99,13 +104,14 @@ public class UserService : IUserService
         return true;
     }
 
-    private static UserDto ToDto(User user) => new()
+    private static UserDto ToDto(User user, List<int> websiteIds) => new()
     {
         Id = user.Id,
         Username = user.Username,
         Role = user.Role.ToString(),
         IsActive = user.IsActive,
         NotifyOnNewCase = user.NotifyOnNewCase,
-        CreatedAt = user.CreatedAt
+        CreatedAt = user.CreatedAt,
+        WebsiteIds = websiteIds
     };
 }

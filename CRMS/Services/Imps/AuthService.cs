@@ -11,12 +11,14 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly ITokenService _tokenService;
     private readonly IPasswordHasher<User> _passwordHasher;
+    private readonly IWebsiteService _websiteService;
 
-    public AuthService(IUserRepository userRepository, ITokenService tokenService, IPasswordHasher<User> passwordHasher)
+    public AuthService(IUserRepository userRepository, ITokenService tokenService, IPasswordHasher<User> passwordHasher, IWebsiteService websiteService)
     {
         _userRepository = userRepository;
         _tokenService = tokenService;
         _passwordHasher = passwordHasher;
+        _websiteService = websiteService;
     }
 
     public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto request)
@@ -34,13 +36,15 @@ public class AuthService : IAuthService
         }
 
         var (token, expiresAt) = _tokenService.GenerateToken(user);
+        var websites = await _websiteService.GetAccessibleAsync(user.Id, user.Role == Role.Admin);
 
         return new LoginResponseDto
         {
             Token = token,
             ExpiresAt = expiresAt,
             Username = user.Username,
-            Role = user.Role.ToString()
+            Role = user.Role.ToString(),
+            Websites = websites
         };
     }
 }

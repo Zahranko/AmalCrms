@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
 import '../data/nav_items.dart';
 import '../data/services/language_service.dart';
+import '../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 
 /// Mirrors the .drawer in nav.css / renderDrawerNav() in nav.js.
@@ -13,10 +14,13 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
-    final role = authController.session.value?.role;
+    final session = authController.session.value;
+    final role = session?.role;
     final currentRoute = Get.currentRoute;
 
-    final items = NavItems.items.where((item) => item.roles == null || item.roles!.contains(role)).toList();
+    final activeWebsite = authController.activeWebsite.value;
+    final canSwitch = (session?.websites.length ?? 0) > 1;
+    final items = NavItems.itemsFor(activeWebsite?.key, role);
 
     return Drawer(
       child: SafeArea(
@@ -37,6 +41,23 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
             const Divider(height: 1),
+            if (activeWebsite != null)
+              ListTile(
+                leading: const Icon(Icons.apps_rounded, color: AppColors.blue500),
+                title: Text(
+                  activeWebsite.name,
+                  style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600, color: AppColors.navy700),
+                ),
+                subtitle: canSwitch ? Text('website.switch'.tr, style: const TextStyle(fontSize: 11.5, color: AppColors.muted)) : null,
+                trailing: canSwitch ? const Icon(Icons.unfold_more_rounded, color: AppColors.muted, size: 20) : null,
+                onTap: canSwitch
+                    ? () {
+                        Navigator.of(context).pop();
+                        Get.toNamed(Routes.websitePicker);
+                      }
+                    : null,
+              ),
+            if (activeWebsite != null) const Divider(height: 1),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(vertical: 8),

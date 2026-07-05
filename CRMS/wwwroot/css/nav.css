@@ -229,3 +229,216 @@ body {
   right: 16px;
   z-index: 1;
 }
+
+/* ===== Multi-website: switcher, picker, contact, params ===== */
+
+/* Topbar website switcher */
+.website-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid rgba(10, 58, 92, 0.14);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--navy-900);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.website-switcher:hover:not(.website-switcher--single) {
+  border-color: var(--blue-500);
+  background: #eaf6fd;
+}
+.website-switcher--single {
+  cursor: default;
+}
+.website-switcher__caret {
+  font-size: 0.7rem;
+  color: var(--blue-500);
+}
+.website-switcher__label {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Website picker page */
+.wp-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(160deg, var(--navy-900) 0%, var(--navy-700) 55%, var(--blue-500) 140%);
+  position: relative;
+}
+.wp-lang {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+}
+.wp-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 40px 32px 28px;
+  text-align: center;
+}
+.wp-logo {
+  height: 54px;
+  margin-bottom: 18px;
+}
+.wp-card h1 {
+  color: var(--navy-900);
+  font-size: 1.4rem;
+  margin: 0 0 6px;
+}
+.wp-card > p {
+  color: var(--muted);
+  margin: 0 0 24px;
+  font-size: 0.92rem;
+}
+.wp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: start;
+}
+.wp-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(10, 58, 92, 0.12);
+  border-radius: var(--radius-md);
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+.wp-item:hover {
+  border-color: var(--blue-500);
+  box-shadow: 0 10px 26px -16px rgba(10, 58, 92, 0.5);
+}
+.wp-item:active {
+  transform: translateY(1px);
+}
+.wp-item--active {
+  border-color: var(--blue-500);
+  background: #f0f9fe;
+}
+.wp-item__avatar {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(150deg, var(--navy-700), var(--blue-500));
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.wp-item__text {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.wp-item__name {
+  color: var(--ink);
+  font-weight: 600;
+}
+.wp-item__key {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.wp-item__arrow {
+  color: var(--blue-500);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.wp-logout {
+  margin-top: 22px;
+}
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.btn-text:hover {
+  color: var(--navy-900);
+}
+
+/* Contact "coming soon" placeholder */
+.coming-soon {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+.coming-soon__icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  color: var(--blue-500);
+}
+.coming-soon__icon svg {
+  width: 100%;
+  height: 100%;
+}
+.coming-soon h1 {
+  color: var(--navy-900);
+  margin: 0 0 8px;
+}
+
+/* User form: website access + notes */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+.field-note {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 6px 0 0;
+}
+
+/* System parameters editor */
+.btn-icon {
+  border: none;
+  background: rgba(214, 69, 80, 0.1);
+  color: var(--error);
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.btn-icon:hover {
+  background: rgba(214, 69, 80, 0.2);
+}
+.sp-saved {
+  color: #1f9d55;
+  font-weight: 600;
+  font-size: 0.9rem;
+  align-self: center;
+}
+
+/* RTL tweaks */
+[dir='rtl'] .wp-lang {
+  right: auto;
+  left: 24px;
+}

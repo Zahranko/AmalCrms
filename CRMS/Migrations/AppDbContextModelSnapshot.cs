@@ -148,6 +148,9 @@ namespace CRMS.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AssignedToUserId");
@@ -165,6 +168,8 @@ namespace CRMS.Migrations
                     b.HasIndex("ProcedureId");
 
                     b.HasIndex("ReferralSourceId");
+
+                    b.HasIndex("WebsiteId");
 
                     b.ToTable("Customers");
                 });
@@ -187,7 +192,12 @@ namespace CRMS.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("WebsiteId");
 
                     b.ToTable("Departments");
                 });
@@ -210,7 +220,12 @@ namespace CRMS.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("WebsiteId");
 
                     b.ToTable("Doctors");
                 });
@@ -245,11 +260,16 @@ namespace CRMS.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("WebsiteId");
 
                     b.ToTable("Notifications");
                 });
@@ -272,7 +292,12 @@ namespace CRMS.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("WebsiteId");
 
                     b.ToTable("Procedures");
                 });
@@ -295,7 +320,12 @@ namespace CRMS.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("WebsiteId");
 
                     b.ToTable("ReferralSources");
                 });
@@ -339,6 +369,91 @@ namespace CRMS.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("CRMS.Data.Models.UserWebsite", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "WebsiteId");
+
+                    b.HasIndex("WebsiteId");
+
+                    b.ToTable("UserWebsites");
+                });
+
+            modelBuilder.Entity("CRMS.Data.Models.Website", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("Websites");
+                });
+
+            modelBuilder.Entity("CRMS.Data.Models.WebsiteSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("WebsiteId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WebsiteId");
+
+                    b.HasIndex("WebsiteId", "Key")
+                        .IsUnique();
+
+                    b.ToTable("WebsiteSettings");
                 });
 
             modelBuilder.Entity("CRMS.Data.Models.CaseAction", b =>
@@ -424,6 +539,12 @@ namespace CRMS.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("CRMS.Data.Models.Website", null)
+                        .WithMany()
+                        .HasForeignKey("WebsiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("AssignedTo");
 
                     b.Navigation("CreatedBy");
@@ -441,6 +562,24 @@ namespace CRMS.Migrations
                     b.Navigation("ReferralSource");
                 });
 
+            modelBuilder.Entity("CRMS.Data.Models.Department", b =>
+                {
+                    b.HasOne("CRMS.Data.Models.Website", null)
+                        .WithMany()
+                        .HasForeignKey("WebsiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CRMS.Data.Models.Doctor", b =>
+                {
+                    b.HasOne("CRMS.Data.Models.Website", null)
+                        .WithMany()
+                        .HasForeignKey("WebsiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CRMS.Data.Models.Notification", b =>
                 {
                     b.HasOne("CRMS.Data.Models.Customer", "Customer")
@@ -454,9 +593,61 @@ namespace CRMS.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("CRMS.Data.Models.Website", null)
+                        .WithMany()
+                        .HasForeignKey("WebsiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Customer");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CRMS.Data.Models.Procedure", b =>
+                {
+                    b.HasOne("CRMS.Data.Models.Website", null)
+                        .WithMany()
+                        .HasForeignKey("WebsiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CRMS.Data.Models.ReferralSource", b =>
+                {
+                    b.HasOne("CRMS.Data.Models.Website", null)
+                        .WithMany()
+                        .HasForeignKey("WebsiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CRMS.Data.Models.UserWebsite", b =>
+                {
+                    b.HasOne("CRMS.Data.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CRMS.Data.Models.Website", "Website")
+                        .WithMany()
+                        .HasForeignKey("WebsiteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Website");
+                });
+
+            modelBuilder.Entity("CRMS.Data.Models.WebsiteSetting", b =>
+                {
+                    b.HasOne("CRMS.Data.Models.Website", null)
+                        .WithMany()
+                        .HasForeignKey("WebsiteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

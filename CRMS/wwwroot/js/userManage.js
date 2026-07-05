@@ -102,10 +102,46 @@ const userPasswordInput = document.getElementById('user-password');
 const userRoleInput = document.getElementById('user-role');
 const userNotifyField = document.getElementById('user-notify-field');
 const userNotifyInput = document.getElementById('user-notify-new-case');
+const userWebsitesField = document.getElementById('user-websites-field');
+const userWebsitesList = document.getElementById('user-websites-list');
+const userWebsitesAdminNote = document.getElementById('user-websites-admin-note');
+const userWebsitesEmpty = document.getElementById('user-websites-empty');
 const userFormError = document.getElementById('user-form-error');
 const userFormSubmit = document.getElementById('user-form-submit');
 
+// All websites the admin can assign access to (Admin sees every website).
+let allWebsites = [];
+
+// Render one checkbox per website, pre-checking the given ids.
+function renderWebsiteCheckboxes(selectedIds) {
+  const selected = new Set((selectedIds || []).map(Number));
+  userWebsitesEmpty.hidden = allWebsites.length > 0;
+  userWebsitesList.innerHTML = allWebsites
+    .map(
+      (w) => `
+      <label class="checkbox-label">
+        <input type="checkbox" class="user-website-cb" value="${w.id}" ${selected.has(w.id) ? 'checked' : ''} />
+        <span>${escapeHtml(websiteName(w))}</span>
+      </label>`
+    )
+    .join('');
+}
+
+// Admins have implicit all-access, so the per-website checkboxes only apply to
+// the other roles.
+function syncWebsiteFieldForRole() {
+  const isAdmin = userRoleInput.value === 'Admin';
+  userWebsitesList.hidden = isAdmin;
+  userWebsitesEmpty.hidden = isAdmin || allWebsites.length > 0;
+  userWebsitesAdminNote.hidden = !isAdmin;
+}
+
+function selectedWebsiteIds() {
+  return [...userWebsitesList.querySelectorAll('.user-website-cb:checked')].map((cb) => Number(cb.value));
+}
+
 document.getElementById('add-user-btn').addEventListener('click', () => openUserModal(null));
+userRoleInput.addEventListener('change', syncWebsiteFieldForRole);
 document.getElementById('user-modal-close').addEventListener('click', closeUserModal);
 document.getElementById('user-modal-cancel').addEventListener('click', closeUserModal);
 userModal.addEventListener('click', (e) => {
@@ -125,6 +161,7 @@ function openUserModal(user) {
     userPasswordField.hidden = true;
     userPasswordInput.required = false;
     userNotifyField.hidden = false;
+    renderWebsiteCheckboxes(user.websiteIds || []);
   } else {
     userModalTitle.textContent = t('userForm.addTitle');
     userRoleInput.value = 'Employee';
@@ -132,8 +169,12 @@ function openUserModal(user) {
     userPasswordField.hidden = false;
     userPasswordInput.required = true;
     userNotifyField.hidden = true;
+    // Default a new user's access to the website the admin is currently in.
+    const active = getActiveWebsite();
+    renderWebsiteCheckboxes(active ? [active.id] : []);
   }
 
+  syncWebsiteFieldForRole();
   userModal.hidden = false;
   userUsernameInput.focus();
 }
@@ -149,14 +190,16 @@ userForm.addEventListener('submit', async (event) => {
   const username = userUsernameInput.value.trim();
   const role = userRoleInput.value;
   const password = userPasswordInput.value;
+  // Admins are all-access, so their explicit membership list is irrelevant.
+  const websiteIds = role === 'Admin' ? [] : selectedWebsiteIds();
 
   setSubmitLoading(userFormSubmit, true, t('action.save'));
   try {
     if (editingUserId) {
-      const updated = await apiUpdateUser(editingUserId, { username, role, notifyOnNewCase: userNotifyInput.checked });
+      const updated = await apiUpdateUser(editingUserId, { username, role, notifyOnNewCase: userNotifyInput.checked, websiteIds });
       replaceUserInCache(updated);
     } else {
-      const created = await apiCreateUser({ username, password, role });
+      const created = await apiCreateUser({ username, password, role, websiteIds });
       usersCache.push(created);
     }
     renderUsersTable(usersCache);
@@ -284,6 +327,14 @@ function setSubmitLoading(button, isLoading, label) {
 
 // ---------- Init ----------
 
+async function loadWebsites() {
+  try {
+    allWebsites = await apiGetMyWebsites();
+  } catch {
+    allWebsites = getAccessibleWebsites();
+  }
+}
+
 if (session && session.role === 'Admin') {
-  loadUsers();
+  loadWebsites().then(loadUsers);
 }

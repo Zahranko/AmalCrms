@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../modules/admin_dashboard/bindings/admin_dashboard_binding.dart';
 import '../modules/admin_dashboard/views/admin_dashboard_view.dart';
+import '../modules/contact/views/contact_view.dart';
 import '../modules/case_detail/bindings/case_detail_binding.dart';
 import '../modules/case_detail/views/case_detail_view.dart';
 import '../modules/cases/bindings/cases_binding.dart';
@@ -20,8 +21,11 @@ import '../modules/new_case/bindings/new_case_binding.dart';
 import '../modules/new_case/views/new_case_view.dart';
 import '../modules/notifications/bindings/notifications_binding.dart';
 import '../modules/notifications/views/notifications_view.dart';
+import '../modules/system_params/bindings/system_params_binding.dart';
+import '../modules/system_params/views/system_params_view.dart';
 import '../modules/users/bindings/users_binding.dart';
 import '../modules/users/views/users_view.dart';
+import '../modules/website_picker/views/website_picker_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -32,6 +36,19 @@ class AppPages {
       name: Routes.login,
       page: () => const LoginView(),
       binding: LoginBinding(),
+    ),
+    GetPage(
+      name: Routes.websitePicker,
+      page: () => const WebsitePickerView(),
+    ),
+    GetPage(
+      name: Routes.contact,
+      page: () => const ContactView(),
+    ),
+    GetPage(
+      name: Routes.systemParams,
+      page: () => const SystemParamsView(),
+      binding: SystemParamsBinding(),
     ),
     GetPage(
       name: Routes.adminDashboard,

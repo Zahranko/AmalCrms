@@ -13,4 +13,7 @@ public class CreateUserDto
 
     [Required]
     public Role Role { get; set; }
+
+    // Websites this user may enter. Ignored for Admins (implicit all-access).
+    public List<int> WebsiteIds { get; set; } = new();
 }

@@ -555,12 +555,12 @@ async function openForwardModal() {
   openModal(forwardModal);
 
   try {
-    if (!allUsers.length) allUsers = await apiGetUsers();
-    const session = getSession();
-    const others = allUsers.filter((u) => u.isActive && u.username !== session?.username);
+    // Website-scoped colleagues (active members of the current website, minus
+    // me) — keeps forwards inside the website so the recipient can accept.
+    if (!allUsers.length) allUsers = await apiGetForwardTargets();
     forwardUserSelect.innerHTML =
       `<option value="">${t('forward.selectColleague')}</option>` +
-      others.map((u) => `<option value="${u.id}">${escapeHtml(u.username)}</option>`).join('');
+      allUsers.map((u) => `<option value="${u.id}">${escapeHtml(u.username)}</option>`).join('');
   } catch (err) {
     setModalError(forwardError, err.message);
   }

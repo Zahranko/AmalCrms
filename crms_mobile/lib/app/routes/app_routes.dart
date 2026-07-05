@@ -2,6 +2,9 @@ abstract class Routes {
   Routes._();
 
   static const login = '/login';
+  static const websitePicker = '/website-picker';
+  static const contact = '/contact';
+  static const systemParams = '/system-params';
   static const adminDashboard = '/admin-dashboard';
   static const hospitalManagerDashboard = '/hospital-manager-dashboard';
   static const dashboard = '/dashboard';

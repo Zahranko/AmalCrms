@@ -53,6 +53,10 @@ public class CasesController : ControllerBase
     public Task<ActionResult<CaseDetailDto>> Claim(int id) =>
         Run(() => _caseService.ClaimAsync(id, CurrentUserId));
 
+    [HttpGet("forward-targets")]
+    public async Task<ActionResult<List<AssignableUserDto>>> GetForwardTargets() =>
+        Ok(await _caseService.GetForwardTargetsAsync(CurrentUserId));
+
     [HttpPost("{id:int}/forward")]
     public Task<ActionResult<CaseDetailDto>> Forward(int id, ForwardDto request) =>
         Run(() => _caseService.ForwardAsync(id, CurrentUserId, request));

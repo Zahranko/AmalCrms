@@ -27,12 +27,7 @@ Future<void> main() async {
   final authController = Get.put(AuthController(StorageService(prefs)), permanent: true);
   Get.put(NotificationCenterController(), permanent: true);
 
-  String initialRoute;
-  if (authController.isLoggedIn) {
-    initialRoute = AuthController.dashboardRouteForRole(authController.session.value!.role);
-  } else {
-    initialRoute = Routes.login;
-  }
+  final initialRoute = authController.isLoggedIn ? authController.resolveInitialRoute() : Routes.login;
 
   runApp(CrmsApp(initialRoute: initialRoute, initialLocale: langService.currentLocale));
 

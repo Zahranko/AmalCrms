@@ -12,4 +12,7 @@ public class UpdateUserDto
     public Role Role { get; set; }
 
     public bool NotifyOnNewCase { get; set; }
+
+    // Websites this user may enter. Ignored for Admins (implicit all-access).
+    public List<int> WebsiteIds { get; set; } = new();
 }

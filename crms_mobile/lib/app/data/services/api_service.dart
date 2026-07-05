@@ -14,6 +14,9 @@ import '../models/hospital_manager_stats.dart';
 import '../models/procedure.dart';
 import '../models/referral_source.dart';
 import '../models/user_session.dart';
+import '../models/website.dart';
+import '../models/website_setting.dart';
+import 'active_website.dart';
 import 'api_config.dart';
 
 class ApiException implements Exception {
@@ -78,6 +81,8 @@ class ApiService {
     final headers = {
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
+      // Scopes every request to the active website (mirrors X-Website-Id in api.js).
+      if (ActiveWebsite.id != null) 'X-Website-Id': '${ActiveWebsite.id}',
     };
     final encodedBody = body != null ? jsonEncode(body) : null;
 
@@ -162,10 +167,34 @@ class ApiService {
     return HospitalManagerStats.fromJson(data as Map<String, dynamic>);
   }
 
+  // ---------- Websites ----------
+
+  Future<List<Website>> getMyWebsites(String token) async {
+    final data = await _request('GET', '/websites/mine', token: token) as List;
+    return data.map((e) => Website.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<List<WebsiteSetting>> getWebsiteSettings(String token) async {
+    final data = await _request('GET', '/websites/settings', token: token) as List;
+    return data.map((e) => WebsiteSetting.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<void> saveWebsiteSettings(String token, List<WebsiteSetting> settings) =>
+      _request('PUT', '/websites/settings', token: token, body: {
+        'settings': settings.map((s) => s.toJson()).toList(),
+      });
+
   // ---------- Users ----------
 
   Future<List<AppUser>> getUsers(String token) async {
     final data = await _request('GET', '/users', token: token) as List;
+    return data.map((e) => AppUser.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  // Website-scoped colleagues a case can be forwarded to (active members of the
+  // active website, minus me). Available to case-working roles, unlike /users.
+  Future<List<AppUser>> getForwardTargets(String token) async {
+    final data = await _request('GET', '/cases/forward-targets', token: token) as List;
     return data.map((e) => AppUser.fromJson(e as Map<String, dynamic>)).toList();
   }
 
@@ -174,11 +203,13 @@ class ApiService {
     required String username,
     required String password,
     required String role,
+    List<int> websiteIds = const [],
   }) async {
     final data = await _request('POST', '/users', token: token, body: {
       'username': username,
       'password': password,
       'role': role,
+      'websiteIds': websiteIds,
     });
     return AppUser.fromJson(data as Map<String, dynamic>);
   }
@@ -189,11 +220,13 @@ class ApiService {
     required String username,
     required String role,
     required bool notifyOnNewCase,
+    List<int> websiteIds = const [],
   }) async {
     final data = await _request('PUT', '/users/$id', token: token, body: {
       'username': username,
       'role': role,
       'notifyOnNewCase': notifyOnNewCase,
+      'websiteIds': websiteIds,
     });
     return AppUser.fromJson(data as Map<String, dynamic>);
   }

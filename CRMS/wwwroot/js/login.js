@@ -9,7 +9,12 @@ const togglePasswordBtn = document.getElementById('toggle-password');
 
 const existingSession = getSession();
 if (existingSession) {
-  window.location.href = homePageForRole(existingSession.role);
+  const target = routeIntoApp(existingSession);
+  if (target) {
+    window.location.href = target;
+  } else {
+    clearSession(); // logged in but no website access — send back to a clean login
+  }
 }
 
 togglePasswordBtn.addEventListener('click', () => {
@@ -50,7 +55,13 @@ form.addEventListener('submit', async (event) => {
   try {
     const session = await apiLogin(username, password);
     saveSession(session);
-    window.location.href = homePageForRole(session.role);
+    const target = routeIntoApp(session);
+    if (!target) {
+      clearSession();
+      setError(t('login.noWebsiteAccess'));
+      return;
+    }
+    window.location.href = target;
   } catch (err) {
     setError(err.message || t('login.errorGeneric'));
   } finally {

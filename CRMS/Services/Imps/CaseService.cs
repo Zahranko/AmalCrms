@@ -17,6 +17,7 @@ public class CaseService : ICaseService
     private readonly IDepartmentRepository _departmentRepository;
     private readonly IDoctorRepository _doctorRepository;
     private readonly INotificationService _notificationService;
+    private readonly IWebsiteContext _websiteContext;
 
     public CaseService(
         ICustomerRepository customerRepository,
@@ -26,7 +27,8 @@ public class CaseService : ICaseService
         IProcedureRepository procedureRepository,
         IDepartmentRepository departmentRepository,
         IDoctorRepository doctorRepository,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IWebsiteContext websiteContext)
     {
         _customerRepository = customerRepository;
         _caseActionRepository = caseActionRepository;
@@ -36,6 +38,22 @@ public class CaseService : ICaseService
         _departmentRepository = departmentRepository;
         _doctorRepository = doctorRepository;
         _notificationService = notificationService;
+        _websiteContext = websiteContext;
+    }
+
+    // Colleagues a case on the active website can be forwarded to: active members
+    // of this website (plus Admins), minus the caller. Keeps forwards inside the
+    // website so the recipient can actually open and accept the case.
+    public async Task<List<AssignableUserDto>> GetForwardTargetsAsync(int currentUserId)
+    {
+        if (_websiteContext.WebsiteId is not int websiteId)
+            return new List<AssignableUserDto>();
+
+        var users = await _userRepository.GetActiveForWebsiteAsync(websiteId);
+        return users
+            .Where(u => u.Id != currentUserId)
+            .Select(u => new AssignableUserDto { Id = u.Id, Username = u.Username, Role = u.Role.ToString() })
+            .ToList();
     }
 
     public async Task<CaseDto> CreateAsync(CreateCaseDto request, int userId)
@@ -102,9 +120,13 @@ public class CaseService : ICaseService
         var creatorName = creator?.Username ?? "Someone";
 
         // HospitalManager is stats-only and cannot open cases, so a CaseCreated
-        // notification would be a dead end for that role.
+        // notification would be a dead end for that role. Recipients must also
+        // have access to this case's website (Admins have implicit all-access) —
+        // otherwise the alert would point at a case they can never open.
+        var websiteMap = await _userRepository.GetWebsiteIdMapAsync();
         var recipients = (await _userRepository.GetAllAsync())
             .Where(u => u.IsActive && u.Id != creatorUserId && u.NotifyOnNewCase && u.Role != Role.HospitalManager)
+            .Where(u => u.Role == Role.Admin || (websiteMap.GetValueOrDefault(u.Id)?.Contains(customer.WebsiteId) ?? false))
             .ToList();
 
         if (recipients.Count == 0) return;

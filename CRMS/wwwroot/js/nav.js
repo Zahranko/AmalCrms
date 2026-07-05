@@ -4,25 +4,56 @@ if (!session) {
   window.location.href = 'index.html';
 }
 
-// Single source of truth for the drawer. Add new sections here as they're built —
-// set `roles` to restrict an item to specific roles, omit it to show to everyone.
-// HospitalManager is a stats-only role: every case-working page below is
-// explicitly restricted to exclude it, and it gets its own dashboard entry.
-const NAV_ITEMS = [
-  { href: 'dashboard.html', label: 'Dashboard', labelKey: 'nav.dashboard', roles: ['Employee', 'Manager', 'Admin'] },
-  { href: 'newCase.html', label: 'New Case', labelKey: 'nav.newCase', roles: ['Employee', 'Manager', 'Admin'] },
-  { href: 'cases-mine.html', label: 'Cases', labelKey: 'nav.cases', roles: ['Employee', 'Manager', 'Admin'] },
-  { href: 'cases-forwarded-in.html', label: 'Forwarded to Me', labelKey: 'nav.forwardedToMe', roles: ['Employee', 'Manager', 'Admin'] },
-  { href: 'cases-forwarded-out.html', label: 'Forwarded by Me', labelKey: 'nav.forwardedByMe', roles: ['Employee', 'Manager', 'Admin'] },
-  { href: 'manageLists.html', label: 'Manage Lists', labelKey: 'nav.manageLists', roles: ['Admin'] },
-  { href: 'userManage.html', label: 'User Management', labelKey: 'nav.userManagement', roles: ['Admin'] },
-  { href: 'hospitalManagerDashboard.html', label: 'Dashboard', labelKey: 'nav.dashboard', roles: ['HospitalManager'] },
-  { href: 'hospitalManagerDashboard.html', label: 'Hospital Report', labelKey: 'nav.hospitalReport', roles: ['Admin'] }
+// A user reached an app page without an active website (e.g. a bookmark, or
+// they can access several and haven't picked one). Route them correctly.
+let activeWebsite = getActiveWebsite();
+if (session && !activeWebsite) {
+  window.location.href = routeIntoApp(session) || 'index.html';
+}
+
+// Drawer items per website. `crms` is the full CRM; `contact` is the placeholder
+// site. Admin control items (Manage Lists / User Management / System Parameters)
+// live in ADMIN_CONTROL_NAV and are shown for Admin inside every website — they
+// act on whichever website is currently active.
+const WEBSITE_NAV = {
+  crms: [
+    { href: 'dashboard.html', labelKey: 'nav.dashboard', roles: ['Employee', 'Manager', 'Admin'] },
+    { href: 'newCase.html', labelKey: 'nav.newCase', roles: ['Employee', 'Manager', 'Admin'] },
+    { href: 'cases-mine.html', labelKey: 'nav.cases', roles: ['Employee', 'Manager', 'Admin'] },
+    { href: 'cases-forwarded-in.html', labelKey: 'nav.forwardedToMe', roles: ['Employee', 'Manager', 'Admin'] },
+    { href: 'cases-forwarded-out.html', labelKey: 'nav.forwardedByMe', roles: ['Employee', 'Manager', 'Admin'] },
+    { href: 'hospitalManagerDashboard.html', labelKey: 'nav.dashboard', roles: ['HospitalManager'] },
+    { href: 'hospitalManagerDashboard.html', labelKey: 'nav.hospitalReport', roles: ['Admin'] }
+  ],
+  contact: [
+    { href: 'contact.html', labelKey: 'nav.contact', roles: ['Employee', 'Manager', 'Admin', 'HospitalManager'] }
+  ]
+};
+
+const ADMIN_CONTROL_NAV = [
+  { href: 'manageLists.html', labelKey: 'nav.manageLists', roles: ['Admin'] },
+  { href: 'userManage.html', labelKey: 'nav.userManagement', roles: ['Admin'] },
+  { href: 'systemParams.html', labelKey: 'nav.systemParams', roles: ['Admin'] }
 ];
 
-// Human-readable role labels for the topbar/drawer badge — plain roles read
-// fine as-is, but "HospitalManager" needs a space (and translation) to not
-// look broken as the first multi-word role in the app.
+// Website-specific pages that aren't drawer items (detail/secondary pages).
+const WEBSITE_EXTRA_PAGES = {
+  crms: [
+    { href: 'case.html', roles: ['Employee', 'Manager', 'Admin'] },
+    { href: 'adminDashboard.html', roles: ['Admin'] }
+  ],
+  contact: []
+};
+
+// Flattened access table: { href, website (null = admin/any), roles }.
+const PAGE_ACCESS = [];
+for (const [wkey, items] of Object.entries(WEBSITE_NAV)) {
+  items.forEach((it) => PAGE_ACCESS.push({ href: it.href, website: wkey, roles: it.roles }));
+  (WEBSITE_EXTRA_PAGES[wkey] || []).forEach((p) => PAGE_ACCESS.push({ href: p.href, website: wkey, roles: p.roles }));
+}
+ADMIN_CONTROL_NAV.forEach((it) => PAGE_ACCESS.push({ href: it.href, website: null, roles: it.roles }));
+
+// Human-readable role labels for the topbar/drawer badge.
 function roleLabel(role) {
   return role === 'HospitalManager' ? t('role.hospitalManager') : role;
 }
@@ -31,16 +62,35 @@ function currentPage() {
   return window.location.pathname.split('/').pop() || 'dashboard.html';
 }
 
-// Defense-in-depth: nav hiding alone doesn't stop a direct URL/bookmark visit
-// to a page this role shouldn't see. Redirect home if the current page is
-// nav-gated and this role isn't allowed on it. (The real security boundary is
-// the backend's [Authorize(Roles=...)] — this is just a UX guard.)
+// Defense-in-depth on top of the backend's role checks. Also handles a deep link
+// into a page that belongs to a different website than the active one: if the
+// user can access that website, switch context to it; otherwise send them home.
 function enforcePageAccess() {
   const page = currentPage();
-  const matches = NAV_ITEMS.filter((item) => item.href === page);
-  if (!matches.length) return;
-  const allowed = matches.some((item) => !item.roles || item.roles.includes(session.role));
-  if (!allowed) window.location.href = homePageForRole(session.role);
+  const entries = PAGE_ACCESS.filter((e) => e.href === page);
+  if (!entries.length) return;
+
+  const roleMatches = entries.filter((e) => !e.roles || e.roles.includes(session.role));
+  if (!roleMatches.length) {
+    window.location.href = homePage();
+    return;
+  }
+
+  // Admin-control pages (website === null) work under any active website.
+  if (roleMatches.some((e) => e.website === null)) return;
+
+  const activeKey = (getActiveWebsite() || {}).key;
+  if (roleMatches.some((e) => e.website === activeKey)) return;
+
+  // Page belongs to another website — switch to it if the user has access.
+  const targetKey = roleMatches[0].website;
+  const target = getAccessibleWebsites().find((w) => w.key === targetKey);
+  if (target) {
+    setActiveWebsite(target);
+    window.location.reload();
+  } else {
+    window.location.href = homePage();
+  }
 }
 
 function renderDrawerNav() {
@@ -48,12 +98,42 @@ function renderDrawerNav() {
   if (!list) return;
 
   const page = currentPage();
-  list.innerHTML = NAV_ITEMS.filter((item) => !item.roles || item.roles.includes(session.role))
-    .map(
-      (item) =>
-        `<li><a href="${item.href}" class="${item.href === page ? 'active' : ''}">${t(item.labelKey)}</a></li>`
-    )
+  const activeKey = (getActiveWebsite() || {}).key;
+  let items = (WEBSITE_NAV[activeKey] || []).filter((item) => !item.roles || item.roles.includes(session.role));
+  if (session.role === 'Admin') items = items.concat(ADMIN_CONTROL_NAV);
+
+  list.innerHTML = items
+    .map((item) => `<li><a href="${item.href}" class="${item.href === page ? 'active' : ''}">${t(item.labelKey)}</a></li>`)
     .join('');
+}
+
+// Website switcher in the topbar — shows the active website; if the user can
+// access more than one, it opens the picker to switch.
+function renderWebsiteSwitcher() {
+  const active = getActiveWebsite();
+  const container = document.querySelector('.topbar__user');
+  if (!active || !container || document.getElementById('website-switcher')) return;
+
+  const websites = getAccessibleWebsites();
+  const multi = websites.length > 1;
+
+  const el = document.createElement('button');
+  el.id = 'website-switcher';
+  el.type = 'button';
+  el.className = 'website-switcher';
+  el.title = t('website.current', { name: websiteName(active) });
+  el.innerHTML =
+    `<span class="website-switcher__label">${escapeHtml(websiteName(active))}</span>` +
+    (multi ? '<span class="website-switcher__caret" aria-hidden="true">&#9662;</span>' : '');
+
+  if (multi) {
+    el.addEventListener('click', () => {
+      window.location.href = 'websitePicker.html';
+    });
+  } else {
+    el.classList.add('website-switcher--single');
+  }
+  container.insertBefore(el, container.firstChild);
 }
 
 function openDrawer() {
@@ -68,7 +148,7 @@ function closeDrawer() {
   document.getElementById('menu-toggle').setAttribute('aria-expanded', 'false');
 }
 
-if (session) {
+if (session && activeWebsite) {
   enforcePageAccess();
 
   document.getElementById('welcome-name').textContent = t('topbar.hi', { name: session.username });
@@ -86,6 +166,7 @@ if (session) {
     if (event.key === 'Escape') closeDrawer();
   });
 
+  renderWebsiteSwitcher();
   renderDrawerNav();
   renderDrawerUser();
 }
