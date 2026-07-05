@@ -68,8 +68,9 @@ class CaseDetailController extends GetxController {
 
   Future<void> ensureUsers() async {
     if (_usersLoaded) return;
-    final users = await _apiService.getUsers(_token);
-    forwardableUsers.assignAll(users.where((u) => u.isActive && u.username != username).toList());
+    // Website-scoped, non-admin-accessible list (active members of this website
+    // minus me) — keeps forwards inside the website. Mirrors apiGetForwardTargets.
+    forwardableUsers.assignAll(await _apiService.getForwardTargets(_token));
     _usersLoaded = true;
   }
 

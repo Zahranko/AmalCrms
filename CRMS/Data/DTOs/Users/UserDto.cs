@@ -8,4 +8,5 @@ public class UserDto
     public bool IsActive { get; set; }
     public bool NotifyOnNewCase { get; set; }
     public DateTime CreatedAt { get; set; }
+    public List<int> WebsiteIds { get; set; } = new();
 }

@@ -17,6 +17,12 @@ Future<void> showUserFormDialog(BuildContext context, UsersController controller
   final passwordController = TextEditingController();
   String role = user?.role ?? 'Employee';
   bool notifyOnNewCase = user?.notifyOnNewCase ?? false;
+  // Website access: default a new user to the website the admin is currently in.
+  final Set<int> selectedWebsiteIds = {
+    ...(isEdit
+        ? user.websiteIds
+        : (controller.activeWebsiteId != null ? [controller.activeWebsiteId!] : const <int>[]))
+  };
   String? error;
   bool loading = false;
 
@@ -42,9 +48,14 @@ Future<void> showUserFormDialog(BuildContext context, UsersController controller
             error = null;
           });
 
+          // Admins are all-access, so their explicit membership list is ignored.
+          final websiteIds = role == 'Admin' ? const <int>[] : selectedWebsiteIds.toList();
+
           final result = isEdit
-              ? await controller.updateUser(user.id, username: username, role: role, notifyOnNewCase: notifyOnNewCase)
-              : await controller.createUser(username: username, password: password, role: role);
+              ? await controller.updateUser(user.id,
+                  username: username, role: role, notifyOnNewCase: notifyOnNewCase, websiteIds: websiteIds)
+              : await controller.createUser(
+                  username: username, password: password, role: role, websiteIds: websiteIds);
 
           if (result == null) {
             if (dialogContext.mounted) Navigator.of(dialogContext).pop();
@@ -79,6 +90,39 @@ Future<void> showUserFormDialog(BuildContext context, UsersController controller
                   optionLabels: _roleLabels,
                   onChanged: (value) => setState(() => role = value),
                 ),
+                const SizedBox(height: 12),
+                Text('userForm.websites'.tr,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink)),
+                if (role == 'Admin')
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text('userForm.websitesAdminNote'.tr,
+                        style: const TextStyle(fontSize: 12.5, color: AppColors.muted)),
+                  )
+                else if (controller.websites.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text('userForm.websitesNone'.tr,
+                        style: const TextStyle(fontSize: 12.5, color: AppColors.muted)),
+                  )
+                else
+                  ...controller.websites.map(
+                    (w) => CheckboxListTile(
+                      value: selectedWebsiteIds.contains(w.id),
+                      onChanged: (v) => setState(() {
+                        if (v == true) {
+                          selectedWebsiteIds.add(w.id);
+                        } else {
+                          selectedWebsiteIds.remove(w.id);
+                        }
+                      }),
+                      contentPadding: EdgeInsets.zero,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      dense: true,
+                      activeColor: const Color(0xFF3B82F6),
+                      title: Text(w.name, style: const TextStyle(fontSize: 14)),
+                    ),
+                  ),
                 if (isEdit) ...[
                   const SizedBox(height: 8),
                   CheckboxListTile(

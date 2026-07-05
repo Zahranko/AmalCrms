@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using CRMS.Data.DBContext;
 using CRMS.Data.Models;
 using CRMS.Hubs;
+using CRMS.Middleware;
 using CRMS.Repository.Imps;
 using CRMS.Repository.Interfaces;
 using CRMS.Services.Imps;
@@ -29,8 +30,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<AdminSeedSettings>(builder.Configuration.GetSection("AdminSeed"));
 
+builder.Services.AddScoped<IWebsiteContext, WebsiteContext>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IWebsiteRepository, WebsiteRepository>();
+builder.Services.AddScoped<IWebsiteService, WebsiteService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
@@ -115,6 +119,19 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     context.Database.Migrate();
 
+    // Seed the two websites (idempotent). The AddMultiWebsite migration also
+    // inserts these on fresh/existing DBs; this is the safety net for any DB
+    // that already ran migrations but somehow lacks them.
+    if (!await context.Websites.AnyAsync(w => w.Key == "crms"))
+    {
+        context.Websites.Add(new Website { Key = "crms", NameEn = "CRMS", NameAr = "نظام إدارة العملاء" });
+    }
+    if (!await context.Websites.AnyAsync(w => w.Key == "contact"))
+    {
+        context.Websites.Add(new Website { Key = "contact", NameEn = "Contact", NameAr = "تواصل" });
+    }
+    await context.SaveChangesAsync();
+
     if (!await context.Users.AnyAsync())
     {
         var adminSeed = scope.ServiceProvider.GetRequiredService<IOptions<AdminSeedSettings>>().Value;
@@ -135,6 +152,10 @@ app.UseCors(FrontendCorsPolicy);
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Resolve the active website (X-Website-Id header) after auth so the request's
+// AppDbContext is scoped to it. Must run before controllers/hub touch data.
+app.UseMiddleware<WebsiteContextMiddleware>();
 
 app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notifications");

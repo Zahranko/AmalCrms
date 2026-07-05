@@ -13,6 +13,7 @@ public interface ICaseService
     Task<List<CaseDto>> GetForwardedByMeAsync(int userId, bool excludeCompleted = false);
     Task<CaseDetailDto?> GetDetailAsync(int caseId);
     Task<CaseDetailDto> ClaimAsync(int caseId, int userId);
+    Task<List<AssignableUserDto>> GetForwardTargetsAsync(int currentUserId);
     Task<CaseDetailDto> ForwardAsync(int caseId, int userId, ForwardDto request);
     Task<CaseDetailDto> AcceptForwardAsync(int caseId, int userId);
     Task<CaseDetailDto> DeclineForwardAsync(int caseId, int userId);

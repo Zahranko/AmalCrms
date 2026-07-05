@@ -2,9 +2,10 @@ namespace CRMS.Data.Models;
 
 // A "case" in the CRM. Created by an employee; moved around via Forward and
 // updated via Follow-up.
-public class Customer
+public class Customer : ITenantScoped
 {
     public int Id { get; set; }
+    public int WebsiteId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string PhoneCountryCode { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;

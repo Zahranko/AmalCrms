@@ -22,32 +22,92 @@ function saveSession(session) {
   localStorage.setItem('crms.username', session.username);
   localStorage.setItem('crms.role', session.role);
   localStorage.setItem('crms.expiresAt', session.expiresAt);
+  localStorage.setItem('crms.websites', JSON.stringify(session.websites || []));
 }
 
 function getSession() {
   const token = localStorage.getItem('crms.token');
   if (!token) return null;
 
+  let websites = [];
+  try {
+    websites = JSON.parse(localStorage.getItem('crms.websites') || '[]');
+  } catch {
+    websites = [];
+  }
+
   return {
     token,
     username: localStorage.getItem('crms.username'),
     role: localStorage.getItem('crms.role'),
-    expiresAt: localStorage.getItem('crms.expiresAt')
+    expiresAt: localStorage.getItem('crms.expiresAt'),
+    websites
   };
 }
 
 function clearSession() {
-  localStorage.removeItem('crms.token');
-  localStorage.removeItem('crms.username');
-  localStorage.removeItem('crms.role');
-  localStorage.removeItem('crms.expiresAt');
+  ['crms.token', 'crms.username', 'crms.role', 'crms.expiresAt', 'crms.websites', 'crms.activeWebsite']
+    .forEach((k) => localStorage.removeItem(k));
 }
 
-// Single source of truth for where each role lands after login (used by
-// login.js) and where an off-limits page redirects to (nav.js's
-// enforcePageAccess) — keep those two in sync by definition.
-function homePageForRole(role) {
+// ---------- Active website (multi-website) ----------
+// The websites a user may enter come back in the login response; the one they're
+// currently working in is stored separately and sent as X-Website-Id on every
+// API call so the backend scopes data to it.
+
+function getAccessibleWebsites() {
+  const session = getSession();
+  return session ? session.websites || [] : [];
+}
+
+function getActiveWebsite() {
+  try {
+    const raw = localStorage.getItem('crms.activeWebsite');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setActiveWebsite(website) {
+  localStorage.setItem('crms.activeWebsite', JSON.stringify(website));
+}
+
+function getActiveWebsiteKey() {
+  const w = getActiveWebsite();
+  return w ? w.key : null;
+}
+
+// Localized display name for a website (falls back across languages). getLang is
+// provided by i18n.js, which loads before api.js on every page.
+function websiteName(website) {
+  if (!website) return '';
+  const ar = typeof getLang === 'function' && getLang() === 'ar';
+  return ar ? website.nameAr || website.nameEn : website.nameEn || website.nameAr;
+}
+
+// Where to land inside the active website: Contact is a placeholder page; the
+// CRM routes by role. No active website yet → the picker.
+function homePage() {
+  const w = getActiveWebsite();
+  if (!w) return 'websitePicker.html';
+  if (w.key === 'contact') return 'contact.html';
+  const role = localStorage.getItem('crms.role');
   return role === 'HospitalManager' ? 'hospitalManagerDashboard.html' : 'dashboard.html';
+}
+
+// Post-login / post-picker routing. Returns the URL to go to, or null if the
+// user has no website access at all (caller should show a message).
+function routeIntoApp(session) {
+  const websites = (session && session.websites) || [];
+  if (websites.length === 0) return null;
+  if (websites.length === 1) {
+    setActiveWebsite(websites[0]);
+    return homePage();
+  }
+  const active = getActiveWebsite();
+  if (active && websites.some((w) => w.id === active.id)) return homePage();
+  return 'websitePicker.html';
 }
 
 function extractErrorMessage(data, fallback) {
@@ -62,12 +122,14 @@ function extractErrorMessage(data, fallback) {
 
 async function apiRequest(path, options = {}) {
   const session = getSession();
+  const activeWebsite = getActiveWebsite();
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(session ? { Authorization: `Bearer ${session.token}` } : {}),
+      ...(activeWebsite ? { 'X-Website-Id': String(activeWebsite.id) } : {}),
       ...(options.headers || {})
     }
   });
@@ -172,6 +234,20 @@ function apiSetUserStatus(id, isActive) {
     method: 'PATCH',
     body: JSON.stringify({ isActive })
   });
+}
+
+// ---------- Websites ----------
+
+function apiGetMyWebsites() {
+  return apiRequest('/websites/mine');
+}
+
+function apiGetWebsiteSettings() {
+  return apiRequest('/websites/settings');
+}
+
+function apiSaveWebsiteSettings(settings) {
+  return apiRequest('/websites/settings', { method: 'PUT', body: JSON.stringify({ settings }) });
 }
 
 // ---------- Departments ----------
@@ -296,6 +372,10 @@ function apiClaimCase(id) {
   return apiRequest(`/cases/${id}/claim`, { method: 'POST' });
 }
 
+function apiGetForwardTargets() {
+  return apiRequest('/cases/forward-targets');
+}
+
 function apiForwardCase(id, payload) {
   return apiRequest(`/cases/${id}/forward`, { method: 'POST', body: JSON.stringify(payload) });
 }
@@ -355,8 +435,12 @@ function apiGetHospitalManagerStats(from, to) {
 // <a href> to this endpoint would 401 silently. Fetch as a blob instead.
 async function apiExportHospitalManagerStats(from, to) {
   const session = getSession();
+  const activeWebsite = getActiveWebsite();
   const response = await fetch(`${API_BASE_URL}/hospital-manager/stats/export?${hmQueryString(from, to)}`, {
-    headers: { Authorization: `Bearer ${session.token}` }
+    headers: {
+      Authorization: `Bearer ${session.token}`,
+      ...(activeWebsite ? { 'X-Website-Id': String(activeWebsite.id) } : {})
+    }
   });
   if (!response.ok) throw new Error('Failed to generate the report.');
   const blob = await response.blob();

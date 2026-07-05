@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Al Amal Hospital | Choose Website</title>
+  <link rel="icon" type="image/webp" href="amal-logo.webp" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+</head>
+<body>
+  <div class="wp-page">
+    <button id="lang-toggle" class="btn-lang wp-lang">العربية</button>
+    <div class="wp-card">
+      <img src="amal-logo.webp" alt="Al Amal Hospital" class="wp-logo" />
+      <h1 data-i18n="website.pickTitle">Choose a workspace</h1>
+      <p data-i18n="website.pickSubtitle">Select which website you'd like to work in.</p>
+      <div id="wp-list" class="wp-list"></div>
+      <button type="button" id="wp-logout" class="btn-text wp-logout" data-i18n="topbar.logout">Log out</button>
+    </div>
+  </div>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/websitePicker.js"></script>
+</body>
+</html>

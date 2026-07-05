@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../../../controllers/auth_controller.dart';
 import '../../../data/models/app_user.dart';
+import '../../../data/models/website.dart';
 import '../../../data/services/api_service.dart';
 import '../../../routes/app_routes.dart';
 
@@ -10,11 +11,13 @@ class UsersController extends GetxController {
   final ApiService _apiService = ApiService();
 
   final RxList<AppUser> users = <AppUser>[].obs;
+  final RxList<Website> websites = <Website>[].obs;
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
 
   String get _token => authController.session.value!.token;
   String get currentUsername => authController.session.value?.username ?? '';
+  int? get activeWebsiteId => authController.activeWebsite.value?.id;
 
   @override
   void onInit() {
@@ -23,7 +26,16 @@ class UsersController extends GetxController {
       Future.microtask(() => Get.offNamed(Routes.dashboard));
       return;
     }
+    _loadWebsites();
     loadUsers();
+  }
+
+  Future<void> _loadWebsites() async {
+    try {
+      websites.assignAll(await _apiService.getMyWebsites(_token));
+    } catch (_) {
+      websites.assignAll(authController.session.value?.websites ?? const []);
+    }
   }
 
   Future<void> loadUsers() async {
@@ -39,14 +51,27 @@ class UsersController extends GetxController {
     }
   }
 
-  Future<String?> createUser({required String username, required String password, required String role}) =>
+  Future<String?> createUser({
+    required String username,
+    required String password,
+    required String role,
+    List<int> websiteIds = const [],
+  }) =>
       _run(() async {
-        final created = await _apiService.createUser(_token, username: username, password: password, role: role);
+        final created = await _apiService.createUser(_token,
+            username: username, password: password, role: role, websiteIds: websiteIds);
         users.add(created);
       });
 
-  Future<String?> updateUser(int id, {required String username, required String role, required bool notifyOnNewCase}) => _run(() async {
-        final updated = await _apiService.updateUser(_token, id, username: username, role: role, notifyOnNewCase: notifyOnNewCase);
+  Future<String?> updateUser(int id, {
+    required String username,
+    required String role,
+    required bool notifyOnNewCase,
+    List<int> websiteIds = const [],
+  }) =>
+      _run(() async {
+        final updated = await _apiService.updateUser(_token, id,
+            username: username, role: role, notifyOnNewCase: notifyOnNewCase, websiteIds: websiteIds);
         final index = users.indexWhere((u) => u.id == id);
         if (index != -1) users[index] = updated;
       });

@@ -1,8 +1,9 @@
 namespace CRMS.Data.Models;
 
-public class Notification
+public class Notification : ITenantScoped
 {
     public int Id { get; set; }
+    public int WebsiteId { get; set; }
     public int UserId { get; set; }
     public User? User { get; set; }
     public string Message { get; set; } = string.Empty;
